@@ -37,10 +37,10 @@ export class User {
   @Column("numeric", { precision: 10, scale: 2, default: 0 })
   balance: number;
 
-  @Column("varchar", { length: 100, nullable: false })
+  @Column("varchar", { length: 100, nullable: true })
   first_name: string;
 
-  @Column("varchar", { length: 100, nullable: false })
+  @Column("varchar", { length: 100, nullable: true })
   last_name: string;
 
   @CreateDateColumn()
