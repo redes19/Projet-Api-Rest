@@ -6,6 +6,7 @@ import { Movie } from "./entities/movie.js";
 import { Room } from "./entities/room.js";
 import { Screening } from "./entities/screening.js";
 import { Ticket, TicketUsage } from "./entities/ticket.js";
+import { Transaction } from "./entities/transaction.js";
 
 export const AppdDataSource = new DataSource({
   type: "postgres",
@@ -16,5 +17,14 @@ export const AppdDataSource = new DataSource({
   database: process.env.DB_NAME ?? "database",
   synchronize: true,
   logging: true,
-  entities: [User, Token, Movie, Room, Screening, Ticket, TicketUsage],
+  entities: [
+    User,
+    Token,
+    Movie,
+    Room,
+    Screening,
+    Ticket,
+    TicketUsage,
+    Transaction,
+  ],
 });
