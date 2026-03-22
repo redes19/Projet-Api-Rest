@@ -1,5 +1,12 @@
 import { DataSource } from "typeorm";
 import "dotenv/config";
+import { User } from "./entities/user.js";
+import { Token } from "./entities/token.js";
+import { Movie } from "./entities/movie.js";
+import { Room } from "./entities/room.js";
+import { Screening } from "./entities/screening.js";
+import { Ticket, TicketUsage } from "./entities/ticket.js";
+import { Transaction } from "./entities/transaction.js";
 
 export const AppdDataSource = new DataSource({
   type: "postgres",
@@ -11,5 +18,14 @@ export const AppdDataSource = new DataSource({
   schema: process.env.DB_SCHEMA ?? "public",
   synchronize: true,
   logging: true,
-  entities: [],
+  entities: [
+    User,
+    Token,
+    Movie,
+    Room,
+    Screening,
+    Ticket,
+    TicketUsage,
+    Transaction,
+  ],
 });
