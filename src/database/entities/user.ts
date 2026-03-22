@@ -14,13 +14,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Token } from "./token.js";
 
-@Entity()
+@Entity({ name: "users" })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -34,14 +34,23 @@ export class User {
   @Column("varchar", { length: 20, nullable: false, default: "client" })
   role: string;
 
-  @Column("numeric", { precision: 10, scale: 2, default: 0 })
+  @Column("numeric", {
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: {
+      to: (value: number): number => value,
+      from: (value: string | null): number =>
+        value === null ? 0 : parseFloat(value),
+    },
+  })
   balance: number;
 
   @Column("varchar", { length: 100, nullable: true })
-  first_name: string;
+  first_name: string | null;
 
   @Column("varchar", { length: 100, nullable: true })
-  last_name: string;
+  last_name: string | null;
 
   @CreateDateColumn()
   created_at: Date;
@@ -49,7 +58,7 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToOne("Token", (token: Token) => token.user)
+  @OneToMany(() => Token, (token) => token.user)
   tokens!: Token[];
 
   constructor(
@@ -58,8 +67,8 @@ export class User {
     password: string,
     role: string,
     balance: number,
-    first_name: string,
-    last_name: string,
+    first_name: string | null,
+    last_name: string | null,
     created_at: Date,
     updated_at: Date,
   ) {

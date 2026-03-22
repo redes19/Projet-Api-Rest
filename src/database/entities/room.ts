@@ -28,10 +28,10 @@ export class Room {
   name: string;
 
   @Column({ type: "text", nullable: true })
-  description: string;
+  description: string | null;
 
   @Column({ type: "varchar", length: 255, nullable: true })
-  image_url: string;
+  image_url: string | null;
 
   @Column({ type: "varchar", length: 50, nullable: false })
   type: string;
@@ -54,8 +54,8 @@ export class Room {
   constructor(
     id: number,
     name: string,
-    description: string,
-    image_url: string,
+    description: string | null,
+    image_url: string | null,
     type: string,
     capacity: number,
     has_disabled_access: boolean,

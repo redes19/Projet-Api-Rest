@@ -27,19 +27,19 @@ export class Movie {
   title: string;
 
   @Column({ type: "text", nullable: true })
-  description: string;
+  description: string | null;
 
   @Column({ type: "int", nullable: false })
   duration: number;
 
   @Column({ type: "varchar", length: 100, nullable: true })
-  genre: string;
+  genre: string | null;
 
   @Column({ type: "text", nullable: true })
-  poster_url: string;
+  poster_url: string | null;
 
   @Column({ type: "date", nullable: true })
-  release_date: Date;
+  release_date: Date | null;
 
   @CreateDateColumn()
   created_at: Date;
@@ -50,11 +50,11 @@ export class Movie {
   constructor(
     id: number,
     title: string,
-    description: string,
+    description: string | null,
     duration: number,
-    genre: string,
-    poster_url: string,
-    release_date: Date,
+    genre: string | null,
+    poster_url: string | null,
+    release_date: Date | null,
     created_at: Date,
     updated_at: Date,
   ) {

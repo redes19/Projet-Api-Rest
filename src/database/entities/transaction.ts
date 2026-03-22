@@ -29,7 +29,17 @@ export class Transaction {
   @Column({ type: "varchar", length: 20, nullable: false })
   type: string;
 
-  @Column({ type: "numeric", precision: 10, scale: 2, nullable: false })
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: false,
+    transformer: {
+      to: (value: number): number => value,
+      from: (value: string | null): number =>
+        value === null ? 0 : parseFloat(value),
+    },
+  })
   amount: number;
 
   @Column({ type: "text", nullable: true })
