@@ -3,6 +3,7 @@ import "dotenv/config";
 import { User } from "./entities/user.js";
 import { Token } from "./entities/token.js";
 import { Movie } from "./entities/movie.js";
+import { Room } from "./entities/room.js";
 
 export const AppdDataSource = new DataSource({
   type: "postgres",
@@ -13,5 +14,5 @@ export const AppdDataSource = new DataSource({
   database: process.env.DB_NAME ?? "database",
   synchronize: true,
   logging: true,
-  entities: [User, Token, Movie],
+  entities: [User, Token, Movie, Room],
 });
