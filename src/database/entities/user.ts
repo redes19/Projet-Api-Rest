@@ -58,7 +58,7 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Token, (token) => token.user)
+  @OneToMany("Token", (token: Token) => token.user)
   tokens!: Token[];
 
   constructor(

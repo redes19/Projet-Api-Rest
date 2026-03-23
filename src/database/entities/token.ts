@@ -22,7 +22,10 @@ export class Token {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, { nullable: false, onDelete: "CASCADE" })
+  @ManyToOne("User", (user: User) => user.tokens, {
+    nullable: false,
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "user_id" })
   user: User;
 
