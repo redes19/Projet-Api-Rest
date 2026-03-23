@@ -3,7 +3,7 @@ import { AppdDataSource } from "./database/database.js";
 import { initHandlers } from "./handlers/routes.js";
 
 const app = express();
-const PORT = process.env.API_PORT || 3000;
+const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 initHandlers(app);
