@@ -41,7 +41,7 @@ export class Room {
   @Column({ type: "varchar", length: 255, nullable: true })
   image_url: string | null;
 
-  @Column({ enum: RoomType, nullable: false })
+  @Column({ type: "enum", enum: RoomType, nullable: false })
   type: RoomType;
 
   @Column({ type: "integer", nullable: false })
