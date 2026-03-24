@@ -9,7 +9,7 @@ import { Ticket, TicketUsage } from "./entities/ticket.js";
 import { Transaction } from "./entities/transaction.js";
 import { Test } from "./entities/test.js";
 
-export const AppdDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: "postgres",
   host: process.env.DB_HOST ?? "localhost",
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
@@ -27,6 +27,5 @@ export const AppdDataSource = new DataSource({
     Ticket,
     TicketUsage,
     Transaction,
-    Test,
   ],
 });

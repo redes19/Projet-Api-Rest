@@ -1,5 +1,5 @@
 import express from "express";
-import { AppdDataSource } from "./database/database.js";
+import { AppDataSource } from "./database/database.js";
 import { initHandlers } from "./handlers/routes.js";
 
 const app = express();
@@ -9,7 +9,7 @@ app.use(express.json());
 initHandlers(app);
 
 try {
-  await AppdDataSource.initialize();
+  await AppDataSource.initialize();
 } catch (error) {
   console.log(error);
   console.log("Erreur BDD : Initialization failed");

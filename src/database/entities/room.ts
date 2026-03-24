@@ -4,7 +4,7 @@
 // | name                | VARCHAR(100) | ●        | UNIQUE                  |
 // | description         | TEXT         | ○        |                         |
 // | image_url           | VARCHAR(255) | ○        |                         |
-// | type                | VARCHAR(50)  | ●        | 2D, 3D, IMAX, 4DX, VIP… |
+// | type                | VARCHAR(50)  | ●        | 2D, 3D, IMAX, 4DX, VIP  |
 // | capacity            | INT          | ●        | CHECK 15 ≤ x ≤ 30       |
 // | has_disabled_access | BOOLEAN      | ●        | DEFAULT FALSE           |
 // | is_maintenance      | BOOLEAN      | ●        | DEFAULT FALSE           |
@@ -18,6 +18,14 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+
+export enum RoomType {
+  TWO_D = "2D",
+  THREE_D = "3D",
+  IMAX = "IMAX",
+  FOUR_DX = "4DX",
+  VIP = "VIP",
+}
 
 @Entity()
 export class Room {
@@ -33,8 +41,8 @@ export class Room {
   @Column({ type: "varchar", length: 255, nullable: true })
   image_url: string | null;
 
-  @Column({ type: "varchar", length: 50, nullable: false })
-  type: string;
+  @Column({ enum: RoomType, nullable: false })
+  type: RoomType;
 
   @Column({ type: "integer", nullable: false })
   capacity: number;
@@ -56,7 +64,7 @@ export class Room {
     name: string,
     description: string | null,
     image_url: string | null,
-    type: string,
+    type: RoomType,
     capacity: number,
     has_disabled_access: boolean,
     is_maintenance: boolean,
