@@ -7,7 +7,6 @@ import { Room } from "./entities/room.js";
 import { Screening } from "./entities/screening.js";
 import { Ticket, TicketUsage } from "./entities/ticket.js";
 import { Transaction } from "./entities/transaction.js";
-import { Test } from "./entities/test.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
