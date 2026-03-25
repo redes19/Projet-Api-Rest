@@ -1,6 +1,7 @@
 import express from "express";
+import "reflect-metadata";
 import { AppDataSource } from "./database/database.js";
-import { initHandlers } from "./handlers/routes.js";
+import { initHandlers } from "./routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;

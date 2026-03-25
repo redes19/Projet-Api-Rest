@@ -9,16 +9,24 @@
 // | last_name     | VARCHAR(100)  | ○        |                   |
 // | created_at    | TIMESTAMP     | ●        | DEFAULT NOW()     |
 // | updated_at    | TIMESTAMP     | ●        | DEFAULT NOW()     |
+// | deleted_at    | TIMESTAMP     | ○        |                   |
 
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Token } from "./token.js";
+
+export enum UserRole {
+  CLIENT = "client",
+  EMPLOYEE = "employee",
+  ADMIN = "admin",
+}
 
 @Entity({ name: "users" })
 export class User {
@@ -31,8 +39,8 @@ export class User {
   @Column("varchar", { length: 255, nullable: false })
   password: string;
 
-  @Column("varchar", { length: 20, nullable: false, default: "client" })
-  role: string;
+  @Column("enum", { enum: UserRole, default: UserRole.CLIENT })
+  role: UserRole;
 
   @Column("numeric", {
     precision: 10,
@@ -58,6 +66,9 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @DeleteDateColumn()
+  deleted_at: Date | null;
+
   @OneToMany("Token", (token: Token) => token.user)
   tokens!: Token[];
 
@@ -65,12 +76,13 @@ export class User {
     id: number,
     email: string,
     password: string,
-    role: string,
+    role: UserRole,
     balance: number,
     first_name: string | null,
     last_name: string | null,
     created_at: Date,
     updated_at: Date,
+    deleted_at: Date | null,
   ) {
     this.id = id;
     this.email = email;
@@ -81,5 +93,6 @@ export class User {
     this.last_name = last_name;
     this.created_at = created_at;
     this.updated_at = updated_at;
+    this.deleted_at = deleted_at;
   }
 }

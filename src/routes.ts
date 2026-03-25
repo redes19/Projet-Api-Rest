@@ -1,4 +1,11 @@
 import { Request, Response } from "express";
+import {
+  CreateUser,
+  DeleteUser,
+  GetUser,
+  ListUsers,
+  UpdateUser,
+} from "./modules/user/user-handler.js";
 
 export const initHandlers = (app: any) => {
   app.get("/", (req: Request, res: Response) => {
@@ -12,11 +19,11 @@ export const initHandlers = (app: any) => {
   // ======================================
   //                  USER
   // ======================================
-  // app.get("/users", ListUsers);
-  // app.get("/users/:id", GetUser);
-  // app.post("/users/", CreateUser);
-  // app.delete("/users/:id", DeleteUser);
-  // app.patch("/users/:id", UpdateUser);
+  app.get("/users", ListUsers);
+  app.get("/users/:id", GetUser);
+  app.post("/users/", CreateUser);
+  app.delete("/users/:id", DeleteUser);
+  app.patch("/users/:id", UpdateUser);
 
   // app.post("/auth/login", Login);
 };
