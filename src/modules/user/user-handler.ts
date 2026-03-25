@@ -31,7 +31,9 @@ export const CreateUser = async (req: Request, res: Response) => {
 
   try {
     const user = await userUseCase.createUser(req.body);
-    return res.status(201).send(user);
+    const { password, ...sanitizedUser } = user as User;
+
+    return res.status(201).send(sanitizedUser);
   } catch (error: unknown) {
     if (error instanceof ResourceConflictError) {
       return res.status(409).send({
@@ -55,17 +57,20 @@ export const GetUser = async (req: Request, res: Response) => {
   const userUsecase = new UserUsecase(AppDataSource.getRepository(User));
 
   const user = await userUsecase.getUser(userIdRequest.id);
+
   if (user === null) {
     return res.status(404).send({
       error: "user not found",
     });
   }
-  return res.send(user);
+
+  const { password, ...sanitizedUser } = user as User;
+  return res.send(sanitizedUser);
 };
 
 export const UpdateUser = async (req: Request, res: Response) => {
   const validation = UpdateUserValidator.validate({
-    ...req.params,
+    id: req.params.id,
     ...req.body,
   });
   if (validation.error) {
@@ -85,7 +90,8 @@ export const UpdateUser = async (req: Request, res: Response) => {
 
   try {
     const updatedUser = await userUsecase.updateUser(validation.value);
-    return res.send(updatedUser);
+    const { password, ...sanitizedUser } = updatedUser as User;
+    return res.send(sanitizedUser);
   } catch (error: unknown) {
     if (error instanceof ResourceConflictError) {
       return res.status(409).send({
@@ -142,5 +148,11 @@ export const ListUsers = async (req: Request, res: Response) => {
     size,
     balanceMax: listUserRequest.balanceMax,
   });
-  return res.send(users);
+
+  const sanitizedUsers = users.data.map((user: User) => {
+    const { password, ...rest } = user;
+    return rest;
+  });
+
+  return res.send(sanitizedUsers);
 };

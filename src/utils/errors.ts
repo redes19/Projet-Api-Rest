@@ -1,5 +1,5 @@
 export class ResourceConflictError extends Error {
-  constructor(public message: string) {
+  constructor(message: string) {
     super(message);
     this.name = "ResourceConflictError";
   }

@@ -3,8 +3,8 @@ import {
   CreateUserRequest,
   UserIdRequest,
   UpdateUserRequest,
+  ListUserRequest,
 } from "./user-request.js";
-import { ListUserFilter } from "./user-usecase.js";
 
 export const UserIdValidator = Joi.object<UserIdRequest>({
   id: Joi.number().integer().positive().required(),
@@ -26,7 +26,7 @@ export const CreateUserValidator = Joi.object<CreateUserRequest>({
 });
 
 export const UpdateUserValidator = Joi.object<UpdateUserRequest>({
-  id: Joi.number().min(1).required(),
+  id: Joi.number().integer().positive().min(1).required(),
   email: Joi.string().email().optional(),
   password: Joi.string().min(6).optional(),
   role: Joi.string().valid("client", "employee", "admin").optional(),
@@ -40,9 +40,9 @@ export const UpdateUserValidator = Joi.object<UpdateUserRequest>({
   "number.min": "must be greater than or equal to {#limit}",
 });
 
-export const ListUserValidator = Joi.object<ListUserFilter>({
-  page: Joi.number().min(1).optional(),
-  size: Joi.number().min(1).max(100).optional(),
+export const ListUserValidator = Joi.object<ListUserRequest>({
+  page: Joi.number().integer().positive().min(1).optional(),
+  size: Joi.number().integer().positive().min(1).max(100).optional(),
   balanceMax: Joi.number().precision(2).min(0).optional(),
 })
   .messages({

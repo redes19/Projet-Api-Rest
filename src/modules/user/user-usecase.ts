@@ -2,7 +2,7 @@ import { QueryFailedError, Repository } from "typeorm";
 import { User, UserRole } from "../../database/entities/user.js";
 import { ResourceConflictError } from "../../utils/errors.js";
 
-interface createUserData {
+interface CreateUserData {
   email: string;
   password: string;
   role: UserRole;
@@ -11,7 +11,7 @@ interface createUserData {
   last_name?: string | null;
 }
 
-interface updateUserData {
+interface UpdateUserData {
   id: number;
   email?: string;
   password?: string;
@@ -37,7 +37,8 @@ export interface ListUserFilter {
 export class UserUsecase {
   constructor(private userRepository: Repository<User>) {}
 
-  async createUser(userData: createUserData) {
+  async createUser(userData: CreateUserData) {
+    // TODO: Hash password
     try {
       const user = this.userRepository.create({
         email: userData.email,
@@ -53,7 +54,7 @@ export class UserUsecase {
         const code = (error as any).code;
 
         if (code === "23505") {
-          throw new ResourceConflictError("error email is already taken");
+          throw new ResourceConflictError("email is already taken");
         }
       }
       throw error;
@@ -76,20 +77,22 @@ export class UserUsecase {
     await this.userRepository.softRemove(user);
   }
 
-  async updateUser(userData: updateUserData): Promise<User | null> {
+  async updateUser(userData: UpdateUserData): Promise<User | null> {
     const user = await this.getUser(userData.id);
     if (!user) {
       return null;
     }
     try {
+      // TODO: Hash password si mis à jour
       this.userRepository.merge(user, userData);
+
       return await this.userRepository.save(user);
     } catch (error) {
       if (error instanceof QueryFailedError) {
         const code = (error as any).code;
 
         if (code === "23505") {
-          throw new ResourceConflictError("error email is already taken");
+          throw new ResourceConflictError("email is already taken");
         }
       }
       throw error;
@@ -101,9 +104,9 @@ export class UserUsecase {
     size,
     balanceMax,
   }: ListUserFilter): Promise<ListResponse<User>> {
-    const query = this.userRepository.createQueryBuilder();
+    const query = this.userRepository.createQueryBuilder("user");
     if (balanceMax !== undefined) {
-      query.andWhere("balance <= :balanceMax", { balanceMax });
+      query.andWhere("user.balance <= :balanceMax", { balanceMax });
     }
     query.skip((page - 1) * size);
     query.take(size);
