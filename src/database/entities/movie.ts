@@ -56,7 +56,7 @@ export class Movie {
     poster_url: string | null,
     release_date: Date | null,
     created_at: Date,
-    updated_at: Date,
+    updated_at: Date
   ) {
     this.id = id;
     this.title = title;

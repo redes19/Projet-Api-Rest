@@ -55,7 +55,7 @@ export class Ticket {
     user: User,
     type: TicketType,
     remaining_uses: number,
-    purchased_at: Date,
+    purchased_at: Date
   ) {
     this.id = id;
     this.user = user;

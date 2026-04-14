@@ -47,7 +47,7 @@ export class Token {
     token_hash: string,
     expires_at: Date,
     created_at: Date,
-    revoked_at: Date | null,
+    revoked_at: Date | null
   ) {
     this.id = id;
     this.user = user;

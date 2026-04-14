@@ -54,7 +54,7 @@ export class Transaction {
     type: string,
     amount: number,
     description: string | null,
-    created_at: Date,
+    created_at: Date
   ) {
     this.id = id;
     this.user = user;
