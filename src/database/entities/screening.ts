@@ -52,7 +52,7 @@ export class Screening {
     start_time: Date,
     end_time: Date,
     created_at: Date,
-    updated_at: Date,
+    updated_at: Date
   ) {
     this.id = id;
     this.movie = movie;

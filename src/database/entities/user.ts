@@ -82,7 +82,7 @@ export class User {
     last_name: string | null,
     created_at: Date,
     updated_at: Date,
-    deleted_at: Date | null,
+    deleted_at: Date | null
   ) {
     this.id = id;
     this.email = email;

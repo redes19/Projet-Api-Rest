@@ -69,7 +69,7 @@ export class Room {
     has_disabled_access: boolean,
     is_maintenance: boolean,
     created_at: Date,
-    updated_at: Date,
+    updated_at: Date
   ) {
     this.id = id;
     this.name = name;

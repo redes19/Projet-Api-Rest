@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, Application } from "express";
 import {
   CreateUser,
   DeleteUser,
@@ -7,7 +7,7 @@ import {
   UpdateUser,
 } from "./modules/user/user-handler.js";
 
-export const initHandlers = (app: any) => {
+export const initHandlers = (app: Application) => {
   app.get("/", (req: Request, res: Response) => {
     res.status(200);
     return res.send({
