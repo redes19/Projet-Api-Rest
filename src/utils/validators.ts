@@ -5,7 +5,7 @@ export interface ValidationError {
 }
 
 export const generateValidationErrorMessage = (
-  errorDetails: Joi.ValidationErrorItem[],
+  errorDetails: Joi.ValidationErrorItem[]
 ): ValidationError => {
   const formattedErrors: ValidationError = {};
   errorDetails.forEach((detail) => {

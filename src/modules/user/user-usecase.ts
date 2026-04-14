@@ -51,7 +51,7 @@ export class UserUsecase {
       return this.userRepository.save(user);
     } catch (error) {
       if (error instanceof QueryFailedError) {
-        const code = (error as any).code;
+        const code = (error.driverError as { code: string }).code;
 
         if (code === "23505") {
           throw new ResourceConflictError("email is already taken");
@@ -89,7 +89,7 @@ export class UserUsecase {
       return await this.userRepository.save(user);
     } catch (error) {
       if (error instanceof QueryFailedError) {
-        const code = (error as any).code;
+        const code = (error.driverError as { code: string }).code;
 
         if (code === "23505") {
           throw new ResourceConflictError("email is already taken");
