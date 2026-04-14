@@ -7,10 +7,8 @@ Architecture provisoire
 ```
 src/
 │
-├── app/
-│   ├── app.ts
-│   ├── routes.ts
-│   └── container.ts
+├── index.ts
+├── routes.ts
 │
 ├── config/
 │   ├── env.ts
