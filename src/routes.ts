@@ -6,6 +6,7 @@ import {
   ListUsers,
   UpdateUser,
 } from "./modules/user/user-handler.js";
+import { AuthMiddleware } from "./middleware/auth.middleware.js";
 
 export const initHandlers = (app: Application) => {
   app.get("/", (req: Request, res: Response) => {
@@ -22,8 +23,8 @@ export const initHandlers = (app: Application) => {
   app.get("/users", ListUsers);
   app.get("/users/:id", GetUser);
   app.post("/users/", CreateUser);
-  app.delete("/users/:id", DeleteUser);
-  app.patch("/users/:id", UpdateUser);
+  app.delete("/users/:id", AuthMiddleware, DeleteUser);
+  app.patch("/users/:id", AuthMiddleware, UpdateUser);
 
   // app.post("/auth/login", Login);
 };

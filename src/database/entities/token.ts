@@ -30,7 +30,7 @@ export class Token {
   user: User;
 
   @Column("varchar", { unique: true, length: 255, nullable: false })
-  token_hash: string;
+  token: string;
 
   @Column("timestamp")
   expires_at: Date;
@@ -44,14 +44,14 @@ export class Token {
   constructor(
     id: number,
     user: User,
-    token_hash: string,
+    token: string,
     expires_at: Date,
     created_at: Date,
     revoked_at: Date | null
   ) {
     this.id = id;
     this.user = user;
-    this.token_hash = token_hash;
+    this.token = token;
     this.expires_at = expires_at;
     this.created_at = created_at;
     this.revoked_at = revoked_at;
