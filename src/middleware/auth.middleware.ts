@@ -8,15 +8,21 @@ export const AuthMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log("Authentification en cours");
+
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  console.log("authHeader ", authHeader);
+
   const token = authHeader.split(" ")[1];
   if (!token) {
     return res.status(401).json({ error: "Unauthorized" });
   }
+
+  console.log("token ", token);
 
   const tokenRepo = AppDataSource.getRepository(Token);
   const tokenFound = await tokenRepo.findOne({ where: { token } }); // Remplacez 'value' par le nom réel de la propriété dans votre entité Token
