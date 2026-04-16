@@ -28,3 +28,8 @@ export interface ListUserRequest {
   size?: number;
   balanceMax?: number;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
