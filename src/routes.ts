@@ -13,6 +13,13 @@ import {
   ListRooms,
   UpdateRoom,
 } from "./modules/room/room-handler.js";
+import {
+  CreateMovie,
+  DeleteMovie,
+  GetMovie,
+  ListMovies,
+  UpdateMovie,
+} from "./modules/movie/movie-handler.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
 
 export const initHandlers = (app: Application) => {
@@ -43,4 +50,13 @@ export const initHandlers = (app: Application) => {
   app.post("/rooms/", CreateRoom);
   app.delete("/rooms/:id", AuthMiddleware, DeleteRoom);
   app.patch("/rooms/:id", AuthMiddleware, UpdateRoom);
+
+  // ======================================
+  //                MOVIE
+  // ======================================
+  app.get("/movies", ListMovies);
+  app.get("/movies/:id", GetMovie);
+  app.post("/movies/", CreateMovie);
+  app.delete("/movies/:id", AuthMiddleware, DeleteMovie);
+  app.patch("/movies/:id", AuthMiddleware, UpdateMovie);
 };
