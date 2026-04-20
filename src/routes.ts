@@ -20,6 +20,13 @@ import {
   ListMovies,
   UpdateMovie,
 } from "./modules/movie/movie-handler.js";
+import {
+  CreateScreening,
+  DeleteScreening,
+  GetScreening,
+  ListScreenings,
+  UpdateScreening,
+} from "./modules/screening/screening-handler.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
 
 export const initHandlers = (app: Application) => {
@@ -59,4 +66,13 @@ export const initHandlers = (app: Application) => {
   app.post("/movies/", CreateMovie);
   app.delete("/movies/:id", AuthMiddleware, DeleteMovie);
   app.patch("/movies/:id", AuthMiddleware, UpdateMovie);
+
+  // ======================================
+  //              SCREENING
+  // ======================================
+  app.get("/screenings", ListScreenings);
+  app.get("/screenings/:id", GetScreening);
+  app.post("/screenings/", CreateScreening);
+  app.delete("/screenings/:id", AuthMiddleware, DeleteScreening);
+  app.patch("/screenings/:id", AuthMiddleware, UpdateScreening);
 };
