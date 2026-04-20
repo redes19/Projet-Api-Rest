@@ -6,6 +6,13 @@ import {
   ListUsers,
   UpdateUser,
 } from "./modules/user/user-handler.js";
+import {
+  CreateRoom,
+  DeleteRoom,
+  GetRoom,
+  ListRooms,
+  UpdateRoom,
+} from "./modules/room/room-handler.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
 
 export const initHandlers = (app: Application) => {
@@ -27,4 +34,13 @@ export const initHandlers = (app: Application) => {
   app.patch("/users/:id", AuthMiddleware, UpdateUser);
 
   // app.post("/auth/login", Login);
+
+  // ======================================
+  //                 ROOM
+  // ======================================
+  app.get("/rooms", ListRooms);
+  app.get("/rooms/:id", GetRoom);
+  app.post("/rooms/", CreateRoom);
+  app.delete("/rooms/:id", AuthMiddleware, DeleteRoom);
+  app.patch("/rooms/:id", AuthMiddleware, UpdateRoom);
 };
