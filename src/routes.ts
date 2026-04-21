@@ -27,6 +27,15 @@ import {
   ListScreenings,
   UpdateScreening,
 } from "./modules/screening/screening-handler.js";
+import {
+  CreateTicket,
+  DeleteTicket,
+  GetTicket,
+  ListTicketUsages,
+  ListTickets,
+  UpdateTicket,
+  UseTicket,
+} from "./modules/ticket/ticket-handler.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
 
 export const initHandlers = (app: Application) => {
@@ -75,4 +84,15 @@ export const initHandlers = (app: Application) => {
   app.post("/screenings/", CreateScreening);
   app.delete("/screenings/:id", AuthMiddleware, DeleteScreening);
   app.patch("/screenings/:id", AuthMiddleware, UpdateScreening);
+
+  // ======================================
+  //                TICKET
+  // ======================================
+  app.get("/tickets", ListTickets);
+  app.get("/tickets/:id", GetTicket);
+  app.post("/tickets/", CreateTicket);
+  app.patch("/tickets/:id", AuthMiddleware, UpdateTicket);
+  app.delete("/tickets/:id", AuthMiddleware, DeleteTicket);
+  app.post("/tickets/:id/use", AuthMiddleware, UseTicket);
+  app.get("/tickets/:id/usages", AuthMiddleware, ListTicketUsages);
 };
