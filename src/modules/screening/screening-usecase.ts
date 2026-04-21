@@ -109,6 +109,34 @@ export class ScreeningUsecase {
     return this.getScreening(updatedScreening.id);
   }
 
+  async hasMovieOverlap({
+    movieId,
+    startTime,
+    endTime,
+    excludeScreeningId,
+  }: {
+    movieId: number;
+    startTime: Date;
+    endTime: Date;
+    excludeScreeningId?: number | undefined;
+  }): Promise<boolean> {
+    const query = this.screeningRepository
+      .createQueryBuilder("screening")
+      .leftJoin("screening.movie", "movie")
+      .where("movie.id = :movieId", { movieId })
+      .andWhere("screening.start_time < :endTime", { endTime })
+      .andWhere("screening.end_time > :startTime", { startTime });
+
+    if (excludeScreeningId !== undefined) {
+      query.andWhere("screening.id != :excludeScreeningId", {
+        excludeScreeningId,
+      });
+    }
+
+    const overlapCount = await query.getCount();
+    return overlapCount > 0;
+  }
+
   async listScreenings({
     page,
     size,
@@ -121,6 +149,9 @@ export class ScreeningUsecase {
       .createQueryBuilder("screening")
       .leftJoinAndSelect("screening.movie", "movie")
       .leftJoinAndSelect("screening.room", "room");
+
+    // TODO: Afficher les salles en maintenance pour les admins
+    query.andWhere("room.is_maintenance = false");
 
     if (movieId !== undefined) {
       query.andWhere("movie.id = :movieId", { movieId });

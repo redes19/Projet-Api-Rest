@@ -3,6 +3,10 @@ import { AppDataSource } from "../../database/database.js";
 import { Movie } from "../../database/entities/movie.js";
 import { Room } from "../../database/entities/room.js";
 import { Screening } from "../../database/entities/screening.js";
+import {
+  hasMinimumScreeningDuration,
+  isWithinCinemaOpeningHours,
+} from "../../utils/dates.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { ScreeningUsecase } from "./screening-usecase.js";
 import {
@@ -41,12 +45,45 @@ export const CreateScreening = async (req: Request, res: Response) => {
     });
   }
 
+  if (room.is_maintenance) {
+    return res.status(400).send({
+      error: "room is in maintenance",
+    });
+  }
+
+  const startTime = validation.value.start_time;
+  const endTime = validation.value.end_time;
+
+  if (!isWithinCinemaOpeningHours(startTime)) {
+    return res.status(400).send({
+      error: "screening must start between 09:00 and 20:00",
+    });
+  }
+
+  if (!hasMinimumScreeningDuration(startTime, endTime, movie.duration)) {
+    return res.status(400).send({
+      error: "screening duration must be at least movie duration + 30 minutes",
+    });
+  }
+
+  const movieOverlap = await screeningUsecase.hasMovieOverlap({
+    movieId: movie.id,
+    startTime,
+    endTime,
+  });
+
+  if (movieOverlap) {
+    return res.status(409).send({
+      error: "overlapping screening detected for this movie",
+    });
+  }
+
   try {
     const screening = await screeningUsecase.createScreening({
       movie,
       room,
-      start_time: validation.value.start_time,
-      end_time: validation.value.end_time,
+      start_time: startTime,
+      end_time: endTime,
     });
 
     return res.status(201).send(screening);
@@ -76,6 +113,12 @@ export const GetScreening = async (req: Request, res: Response) => {
   const screening = await screeningUsecase.getScreening(screeningIdRequest.id);
 
   if (screening === null) {
+    return res.status(404).send({
+      error: "screening not found",
+    });
+  }
+
+  if (screening.room.is_maintenance) {
     return res.status(404).send({
       error: "screening not found",
     });
@@ -133,13 +176,57 @@ export const UpdateScreening = async (req: Request, res: Response) => {
     }
   }
 
+  const finalMovie = movie ?? existingScreening.movie;
+  const finalRoom = room ?? existingScreening.room;
+  const finalStartTime =
+    updateScreeningRequest.start_time ?? existingScreening.start_time;
+  const finalEndTime =
+    updateScreeningRequest.end_time ?? existingScreening.end_time;
+
+  if (finalRoom.is_maintenance) {
+    return res.status(400).send({
+      error: "room is in maintenance",
+    });
+  }
+
+  if (!isWithinCinemaOpeningHours(finalStartTime)) {
+    return res.status(400).send({
+      error: "screening must start between 09:00 and 20:00",
+    });
+  }
+
+  if (
+    !hasMinimumScreeningDuration(
+      finalStartTime,
+      finalEndTime,
+      finalMovie.duration
+    )
+  ) {
+    return res.status(400).send({
+      error: "screening duration must be at least movie duration + 30 minutes",
+    });
+  }
+
+  const movieOverlap = await screeningUsecase.hasMovieOverlap({
+    movieId: finalMovie.id,
+    startTime: finalStartTime,
+    endTime: finalEndTime,
+    excludeScreeningId: existingScreening.id,
+  });
+
+  if (movieOverlap) {
+    return res.status(409).send({
+      error: "overlapping screening detected for this movie",
+    });
+  }
+
   try {
     const updatedScreening = await screeningUsecase.updateScreening({
       id: updateScreeningRequest.id,
-      movie,
-      room,
-      start_time: updateScreeningRequest.start_time,
-      end_time: updateScreeningRequest.end_time,
+      movie: finalMovie,
+      room: finalRoom,
+      start_time: finalStartTime,
+      end_time: finalEndTime,
     });
 
     return res.send(updatedScreening);
