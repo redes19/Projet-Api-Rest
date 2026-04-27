@@ -1,56 +1,103 @@
 import { Repository } from "typeorm";
-import { User } from "../../database/entities/user.js";
+import { User, UserRole } from "../../database/entities/user.js";
 import { Token } from "../../database/entities/token.js";
-import { compare } from "bcrypt";
-import jwt from "jsonwebtoken"
-import { LoginRequest, RegisterRequest } from "../user/user-request.js"
-import { UserRole } from "../../database/entities/user.js"
-import bcrypt from "bcrypt";
+import { compare, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
+import { LoginRequest, RegisterRequest } from "../user/user-request.js";
+
+const JWT_SECRET = process.env.JWT_SECRET ?? "default";
+const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
 
 export class AuthUsecase {
-    constructor(
-        private userRepository: Repository<User>,
-        private tokenRepository: Repository<Token>
-    ) {}
+  constructor(
+    private userRepository: Repository<User>,
+    private tokenRepository: Repository<Token>
+  ) {}
 
-    async login({email, password}: LoginRequest): Promise<Token | null> {
-        const user = await this.userRepository.findOneBy({
-            email
-        })
+  async register(data: RegisterRequest): Promise<AuthTokens | null> {
+    const existing = await this.userRepository.findOneBy({ email: data.email });
+    if (existing) return null;
 
-        if(!user) return null;
+    const hashedPassword = await hash(data.password, 10);
+    const user = this.userRepository.create({
+      email: data.email,
+      password: hashedPassword,
+      role: UserRole.CLIENT,
+      balance: 0,
+      first_name: data.firstName ?? null,
+    });
+    const savedUser = await this.userRepository.save(user);
 
-        const isValid = await compare(password, user.password);
-        if(!isValid) return null;
+    return this.createToken(savedUser);
+  }
 
-        const secret = process.env.JWT_Secret || "valuerandom"
-        const jsonwebtoken = jwt.sign({userId: user.id, email: user.email}, secret, {expiresIn: '24h'})
+  async login({ email, password }: LoginRequest): Promise<AuthTokens | null> {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) return null;
 
-        const token = this.tokenRepository.create({
-            token: jsonwebtoken,
-            user
-        })
+    const isValid = await compare(password, user.password);
+    if (!isValid) return null;
 
-        return await this.tokenRepository.save(token);
+    return this.createToken(user);
+  }
 
+  async refresh(refreshToken: string): Promise<AuthTokens | null> {
+    let payload: jwt.JwtPayload;
+    try {
+      payload = jwt.verify(refreshToken, JWT_SECRET) as jwt.JwtPayload;
+    } catch {
+      return null;
     }
+    if (payload.type !== "refresh") return null;
 
-    async register({firstName, email, password, role = "client" as UserRole}: RegisterRequest) {
-        const emailExisting = await this.userRepository.findOneBy({
-            email
-        });
+    const stored = await this.tokenRepository.findOne({
+      where: { token: refreshToken },
+      relations: ["user"],
+    });
+    if (!stored || stored.revoked_at !== null) return null;
+    if (stored.expires_at.getTime() < Date.now()) return null;
 
-        if(emailExisting) throw new Error("Mail already in use");
+    stored.revoked_at = new Date();
+    await this.tokenRepository.save(stored);
 
-        const hashPassword = await bcrypt.hash(password, 12);
+    return this.createToken(stored.user);
+  }
 
-        const user = this.userRepository.create({first_name: firstName, email, password: hashPassword, role});
-        await this.userRepository.save(user);
+  private async createToken(user: User): Promise<AuthTokens> {
+    const accessToken = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role, type: "access" },
+      JWT_SECRET,
+      { expiresIn: "15m" }
+    );
 
-        //création et affiliation du token a l'user
+    const refreshToken = jwt.sign(
+      { userId: user.id, type: "refresh" },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-        return;
-    }
+    const now = Date.now();
+    await this.tokenRepository.save([
+      this.tokenRepository.create({
+        token: accessToken,
+        user,
+        expires_at: new Date(now + ACCESS_TOKEN_TTL_MS),
+        revoked_at: null,
+      }),
+      this.tokenRepository.create({
+        token: refreshToken,
+        user,
+        expires_at: new Date(now + REFRESH_TOKEN_TTL_MS),
+        revoked_at: null,
+      }),
+    ]);
 
-
+    return { accessToken, refreshToken };
+  }
 }

@@ -35,8 +35,11 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  firstName: string,
-  email: string,
-  password: string,
-  role: UserRole,
+  firstName?: string;
+  email: string;
+  password: string;
+}
+
+export interface RefreshRequest {
+  refreshToken: string;
 }

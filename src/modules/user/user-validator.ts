@@ -5,6 +5,8 @@ import {
   UpdateUserRequest,
   ListUserRequest,
   LoginRequest,
+  RegisterRequest,
+  RefreshRequest,
 } from "./user-request.js";
 
 export const UserIdValidator = Joi.object<UserIdRequest>({
@@ -57,6 +59,16 @@ export const ListUserValidator = Joi.object<ListUserRequest>({
 
 
 export const LoginValidator = Joi.object<LoginRequest>({
-  email : Joi.string().email().required(),
-  password : Joi.string().min(8).required()
-}).options({abortEarly: false})
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+}).options({ abortEarly: false });
+
+export const RegisterValidator = Joi.object<RegisterRequest>({
+  firstName: Joi.string().max(100).optional(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+}).options({ abortEarly: false });
+
+export const RefreshValidator = Joi.object<RefreshRequest>({
+  refreshToken: Joi.string().required(),
+}).options({ abortEarly: false });
