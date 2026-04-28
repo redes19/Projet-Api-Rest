@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../database/database.js";
 import jwt from "jsonwebtoken";
 import { Token } from "../database/entities/token.js";
+import { JwtUserPayload } from "../types/express.js";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "default";
 
@@ -28,7 +29,7 @@ export const AuthMiddleware = async (
     if (payload.type !== "access") {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    (req as any).user = payload;
+    req.user = payload as JwtUserPayload;
     return next();
   } catch {
     return res.status(401).json({ error: "Unauthorized" });

@@ -38,6 +38,8 @@ import {
 } from "./modules/ticket/ticket-handler.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
 import { Login, Register, Refresh } from "./modules/auth/auth-handler.js";
+import { RequireRole } from "./middleware/role.middleware.js";
+import { UserRole } from "./database/entities/user.js";
 
 export const initHandlers = (app: Application) => {
   app.get("/", (req: Request, res: Response) => {
@@ -51,7 +53,7 @@ export const initHandlers = (app: Application) => {
   // ======================================
   //                  USER
   // ======================================
-  app.get("/users", AuthMiddleware, ListUsers);
+  app.get("/users", AuthMiddleware, RequireRole(UserRole.CLIENT), ListUsers);
   app.get("/users/:id", GetUser);
   app.post("/users/", CreateUser);
   app.delete("/users/:id", AuthMiddleware, DeleteUser);
@@ -63,7 +65,6 @@ export const initHandlers = (app: Application) => {
   app.post("/auth/register", Register);
   app.post("/auth/login", Login);
   app.post("/auth/refresh", Refresh);
-  // app.post("/auth/login", Login);
 
   // ======================================
   //                 ROOM
