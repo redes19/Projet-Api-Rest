@@ -28,3 +28,18 @@ export interface ListUserRequest {
   size?: number;
   balanceMax?: number;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  firstName?: string;
+  email: string;
+  password: string;
+}
+
+export interface RefreshRequest {
+  refreshToken: string;
+}

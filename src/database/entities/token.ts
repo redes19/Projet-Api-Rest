@@ -29,7 +29,7 @@ export class Token {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @Column("varchar", { unique: true, length: 255, nullable: false })
+  @Column("text", { unique: true, nullable: false })
   token: string;
 
   @Column("timestamp")
