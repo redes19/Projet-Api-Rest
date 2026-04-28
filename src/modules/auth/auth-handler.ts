@@ -69,7 +69,9 @@ export const Refresh = async (req: Request, res: Response) => {
       validation.value.refreshToken
     );
     if (!tokens) {
-      return res.status(401).send({ error: "invalid or expired refresh token" });
+      return res
+        .status(401)
+        .send({ error: "invalid or expired refresh token" });
     }
     return res.send(tokens);
   } catch (error) {
