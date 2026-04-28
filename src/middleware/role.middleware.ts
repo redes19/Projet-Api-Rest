@@ -3,7 +3,7 @@ import { UserRole } from "../database/entities/user.js";
 
 export const RequireRole = (...allowedRole: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
+    const user = req.user;
 
     if (!user || !user.role) {
       return res.status(401).json({ error: "Unautorized" });
