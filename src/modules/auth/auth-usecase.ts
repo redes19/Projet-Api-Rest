@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import { LoginRequest, RegisterRequest } from "../user/user-request.js";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "default";
-const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const ACCESS_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
 
 export interface AuthTokens {
@@ -47,6 +47,16 @@ export class AuthUsecase {
     return this.createToken(user);
   }
 
+  async logout(userId: number): Promise<void> {
+    await this.tokenRepository
+      .createQueryBuilder()
+      .update()
+      .set({ revoked_at: new Date() })
+      .where("user_id = :user_id", { userId })
+      .andWhere("revoked_at IS NULL")
+      .execute();
+  }
+
   async refresh(refreshToken: string): Promise<AuthTokens | null> {
     let payload: jwt.JwtPayload;
     try {
@@ -73,7 +83,7 @@ export class AuthUsecase {
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email, role: user.role, type: "access" },
       JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "5m" }
     );
 
     const refreshToken = jwt.sign(
