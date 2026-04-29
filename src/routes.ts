@@ -37,7 +37,12 @@ import {
   UseTicket,
 } from "./modules/ticket/ticket-handler.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
-import { Login, Register, Refresh } from "./modules/auth/auth-handler.js";
+import {
+  Login,
+  Register,
+  Refresh,
+  Logout,
+} from "./modules/auth/auth-handler.js";
 import { RequireRole } from "./middleware/role.middleware.js";
 import { UserRole } from "./database/entities/user.js";
 
@@ -65,6 +70,7 @@ export const initHandlers = (app: Application) => {
   app.post("/auth/register", Register);
   app.post("/auth/login", Login);
   app.post("/auth/refresh", Refresh);
+  app.post("/auth/logout", AuthMiddleware, Logout);
 
   // ======================================
   //                 ROOM

@@ -56,6 +56,21 @@ export const Register = async (req: Request, res: Response) => {
   }
 };
 
+export const Logout = async (req: Request, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    await buildAuthUsecase().logout(user.userId);
+    return res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
 export const Refresh = async (req: Request, res: Response) => {
   const validation = RefreshValidator.validate(req.body);
   if (validation.error) {
@@ -69,7 +84,9 @@ export const Refresh = async (req: Request, res: Response) => {
       validation.value.refreshToken
     );
     if (!tokens) {
-      return res.status(401).send({ error: "invalid or expired refresh token" });
+      return res
+        .status(401)
+        .send({ error: "invalid or expired refresh token" });
     }
     return res.send(tokens);
   } catch (error) {
