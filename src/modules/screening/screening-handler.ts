@@ -86,6 +86,15 @@ export const CreateScreening = async (req: Request, res: Response) => {
       end_time: endTime,
     });
 
+    if (screening === "OUTSIDE_OPENING_HOURS") {
+      return res.status(400).send({ error: "Séance hors créneau 9h-20h" });
+    }
+    if (screening === "OVERLAP") {
+      return res
+        .status(409)
+        .send({ error: "Une autre séance occupe déjà ce créneau" });
+    }
+
     return res.status(201).send(screening);
   } catch (_error: unknown) {
     return res.status(500).send({
