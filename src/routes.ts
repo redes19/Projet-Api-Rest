@@ -12,6 +12,7 @@ import {
   GetRoom,
   ListRooms,
   UpdateRoom,
+  GetRoomScreenings,
 } from "./modules/room/room-handler.js";
 import {
   CreateMovie,
@@ -80,6 +81,7 @@ export const initHandlers = (app: Application) => {
   app.post("/rooms/", CreateRoom);
   app.delete("/rooms/:id", AuthMiddleware, DeleteRoom);
   app.patch("/rooms/:id", AuthMiddleware, UpdateRoom);
+  app.get("/rooms/:id/screenings", GetRoomScreenings);
 
   // ======================================
   //                MOVIE

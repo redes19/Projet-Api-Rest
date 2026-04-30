@@ -1,6 +1,7 @@
 import { QueryFailedError, Repository } from "typeorm";
 import { Room, RoomType } from "../../database/entities/room.js";
 import { ResourceConflictError } from "../../utils/errors.js";
+import { Screening } from "../../database/entities/screening.js";
 
 interface CreateRoomData {
   name: string;
@@ -39,7 +40,10 @@ export interface ListRoomFilter {
 }
 
 export class RoomUsecase {
-  constructor(private roomRepository: Repository<Room>) {}
+  constructor(
+    private roomRepository: Repository<Room>,
+    private screeningRepository: Repository<Screening>
+  ) {}
 
   async createRoom(roomData: CreateRoomData) {
     const existing = await this.roomRepository.findOneBy({
@@ -135,5 +139,28 @@ export class RoomUsecase {
       totalCount,
       totalPages: Math.ceil(totalCount / size),
     };
+  }
+
+  async getScreeningsForRoom(
+    roomId: number,
+    from?: Date,
+    to?: Date
+  ): Promise<Screening[] | "ROOM_NOT_FOUND" | "ROOM_IN_MAINTENANCE"> {
+    const room = await this.roomRepository.findOneBy({ id: roomId });
+    if (!room) return "ROOM_NOT_FOUND";
+    if (room.is_maintenance) return "ROOM_IN_MAINTENANCE";
+
+    const query = this.screeningRepository
+      .createQueryBuilder("s")
+      .leftJoinAndSelect("s.movie", "movie")
+      .leftJoinAndSelect("s.room", "room")
+      .where("s.room_id = :roomId", { roomId });
+
+    if (from) query.andWhere("s.start_time >= :from", { from });
+    if (to) query.andWhere("s.end_time <= :to", { to });
+
+    query.orderBy("s.start_time", "ASC");
+
+    return query.getMany();
   }
 }

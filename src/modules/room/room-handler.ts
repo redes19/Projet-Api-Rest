@@ -9,7 +9,9 @@ import {
   ListRoomValidator,
   RoomIdValidator,
   UpdateRoomValidator,
+  RoomScreeningsValidator,
 } from "./room-validator.js";
+import { Screening } from "../../database/entities/screening.js";
 
 export const CreateRoom = async (req: Request, res: Response) => {
   const validation = CreateRoomValidator.validate(req.body);
@@ -20,7 +22,10 @@ export const CreateRoom = async (req: Request, res: Response) => {
       .send(generateValidationErrorMessage(validation.error.details));
   }
 
-  const roomUseCase = new RoomUsecase(AppDataSource.getRepository(Room));
+  const roomUseCase = new RoomUsecase(
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(Screening)
+  );
   const existingRoom = await roomUseCase.getRoomByName(req.body.name);
 
   if (existingRoom) {
@@ -55,7 +60,10 @@ export const GetRoom = async (req: Request, res: Response) => {
   }
 
   const roomIdRequest = validation.value;
-  const roomUsecase = new RoomUsecase(AppDataSource.getRepository(Room));
+  const roomUsecase = new RoomUsecase(
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(Screening)
+  );
   const room = await roomUsecase.getRoom(roomIdRequest.id);
 
   if (room === null) {
@@ -80,7 +88,10 @@ export const UpdateRoom = async (req: Request, res: Response) => {
   }
 
   const updateRoomRequest = validation.value;
-  const roomUsecase = new RoomUsecase(AppDataSource.getRepository(Room));
+  const roomUsecase = new RoomUsecase(
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(Screening)
+  );
   const existingRoom = await roomUsecase.getRoom(updateRoomRequest.id);
 
   if (!existingRoom) {
@@ -115,7 +126,10 @@ export const DeleteRoom = async (req: Request, res: Response) => {
   }
 
   const roomIdRequest = validation.value;
-  const roomUsecase = new RoomUsecase(AppDataSource.getRepository(Room));
+  const roomUsecase = new RoomUsecase(
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(Screening)
+  );
   const room = await roomUsecase.getRoom(roomIdRequest.id);
 
   if (!room) {
@@ -149,7 +163,10 @@ export const ListRooms = async (req: Request, res: Response) => {
     page = listRoomRequest.page;
   }
 
-  const roomUsecase = new RoomUsecase(AppDataSource.getRepository(Room));
+  const roomUsecase = new RoomUsecase(
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(Screening)
+  );
   const rooms = await roomUsecase.listRooms({
     page,
     size,
@@ -158,4 +175,38 @@ export const ListRooms = async (req: Request, res: Response) => {
   });
 
   return res.send(rooms.data);
+};
+
+export const GetRoomScreenings = async (req: Request, res: Response) => {
+  const roomId = parseInt(req.params.id as string, 10);
+  if (isNaN(roomId)) {
+    return res.status(400).send({ error: "Invalid room id" });
+  }
+
+  const validation = RoomScreeningsValidator.validate(req.query);
+  if (validation.error) {
+    return res
+      .status(400)
+      .send(generateValidationErrorMessage(validation.error.details));
+  }
+
+  const usecase = new RoomUsecase(
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(Screening)
+  );
+
+  const result = await usecase.getScreeningsForRoom(
+    roomId,
+    validation.value.from,
+    validation.value.to
+  );
+
+  if (result === "ROOM_NOT_FOUND") {
+    return res.status(404).send({ error: "Room not found" });
+  }
+  if (result === "ROOM_IN_MAINTENANCE") {
+    return res.status(404).send({ error: "Room not found" }); // ou 409 si tu veux être explicite
+  }
+
+  return res.send(result);
 };
