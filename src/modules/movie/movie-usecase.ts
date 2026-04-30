@@ -39,6 +39,11 @@ export class MovieUsecase {
   constructor(private movieRepository: Repository<Movie>) {}
 
   async createMovie(movieData: CreateMovieData) {
+    const existing = await this.movieRepository.findOneBy({
+      title: movieData.title,
+    });
+    if (existing) return null;
+
     const movie = this.movieRepository.create({
       title: movieData.title,
       description: movieData.description || null,
