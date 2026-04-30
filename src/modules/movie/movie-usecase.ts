@@ -31,10 +31,12 @@ export interface ListResponse<T> {
 export interface ListMovieFilter {
   page: number;
   size: number;
-  durationMax?: number | undefined;
-  genre?: string | undefined;
+  durationMax?: number;
+  genre?: string;
+  title?: string;
+  releasedAfter?: Date;
+  releasedBefore?: Date;
 }
-
 export class MovieUsecase {
   constructor(private movieRepository: Repository<Movie>) {}
 
@@ -84,6 +86,9 @@ export class MovieUsecase {
     size,
     durationMax,
     genre,
+    title,
+    releasedAfter,
+    releasedBefore,
   }: ListMovieFilter): Promise<ListResponse<Movie>> {
     const query = this.movieRepository.createQueryBuilder("movie");
 
@@ -93,6 +98,20 @@ export class MovieUsecase {
 
     if (genre !== undefined) {
       query.andWhere("movie.genre = :genre", { genre });
+    }
+
+    if (title !== undefined) {
+      query.andWhere("movie.title ILIKE :title", { title: `%${title}%` });
+    }
+
+    if (releasedAfter !== undefined) {
+      query.andWhere("movie.release_date >= :releasedAfter", { releasedAfter });
+    }
+
+    if (releasedBefore !== undefined) {
+      query.andWhere("movie.release_date <= :releasedBefore", {
+        releasedBefore,
+      });
     }
 
     query.skip((page - 1) * size);

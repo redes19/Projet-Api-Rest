@@ -22,8 +22,20 @@ export interface UpdateMovieRequest {
 }
 
 export interface ListMovieRequest {
+  page?: number | undefined;
+  size?: number | undefined;
+  durationMax?: number | undefined;
+  genre?: string | undefined;
+  title?: string | undefined;
+  releasedAfter?: Date | undefined;
+  releasedBefore?: Date | undefined;
+}
+
+export interface ListMovieFilter {
+  title?: string;
+  genre?: string;
+  releasedAfter?: Date;
+  releasedBefore?: Date;
   page?: number;
   size?: number;
-  durationMax?: number;
-  genre?: string;
 }

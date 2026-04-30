@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../database/database.js";
 import { Movie } from "../../database/entities/movie.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
-import { MovieUsecase } from "./movie-usecase.js";
+import { MovieUsecase, type ListMovieFilter } from "./movie-usecase.js";
 import {
   CreateMovieValidator,
   ListMovieValidator,
@@ -130,12 +130,27 @@ export const ListMovies = async (req: Request, res: Response) => {
   }
 
   const movieUsecase = new MovieUsecase(AppDataSource.getRepository(Movie));
-  const movies = await movieUsecase.listMovies({
+  const listMovieFilter: ListMovieFilter = {
     page,
     size,
-    durationMax: listMovieRequest.durationMax,
-    genre: listMovieRequest.genre,
-  });
+    ...(listMovieRequest.durationMax !== undefined
+      ? { durationMax: listMovieRequest.durationMax }
+      : {}),
+    ...(listMovieRequest.genre !== undefined
+      ? { genre: listMovieRequest.genre }
+      : {}),
+    ...(listMovieRequest.title !== undefined
+      ? { title: listMovieRequest.title }
+      : {}),
+    ...(listMovieRequest.releasedAfter !== undefined
+      ? { releasedAfter: listMovieRequest.releasedAfter }
+      : {}),
+    ...(listMovieRequest.releasedBefore !== undefined
+      ? { releasedBefore: listMovieRequest.releasedBefore }
+      : {}),
+  };
+
+  const movies = await movieUsecase.listMovies(listMovieFilter);
 
   return res.send(movies.data);
 };
