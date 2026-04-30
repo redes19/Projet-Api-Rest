@@ -50,7 +50,31 @@ export class ScreeningUsecase {
     return this.roomRepository.findOneBy({ id });
   }
 
+  private async checkRoomMaintenance(room_id: number): Promise<boolean> {
+    const room = await this.getRoom(room_id);
+    return room?.is_maintenance ? true : false;
+  }
+
   async createScreening(screeningData: CreateScreeningData) {
+    if (await this.checkRoomMaintenance(screeningData.room.id))
+      return "MAINTENANCE";
+
+    const start = new Date(screeningData.start_time);
+    const end = new Date(screeningData.end_time);
+
+    if (start.getHours() < 9 || end.getHours() > 20) {
+      return "OUTSIDE_OPENING_HOURS";
+    }
+
+    const existing = await this.screeningRepository
+      .createQueryBuilder("s")
+      .where("s.room_id = :s.romm_id", { room_id: screeningData.movie })
+      .andWhere("s.start_time < :end", { end })
+      .andWhere("s.end_time > :start", { start })
+      .getCount();
+
+    if (existing) return "OVERLAP";
+
     const screening = this.screeningRepository.create({
       movie: screeningData.movie,
       room: screeningData.room,

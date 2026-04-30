@@ -42,6 +42,12 @@ export class RoomUsecase {
   constructor(private roomRepository: Repository<Room>) {}
 
   async createRoom(roomData: CreateRoomData) {
+    const existing = await this.roomRepository.findOneBy({
+      name: roomData.name,
+    });
+
+    if (existing) return null;
+
     try {
       const room = this.roomRepository.create({
         name: roomData.name,

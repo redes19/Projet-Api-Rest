@@ -4,6 +4,7 @@ import {
   ListMovieRequest,
   MovieIdRequest,
   UpdateMovieRequest,
+  ListMovieFilter,
 } from "./movie-request.js";
 
 export const MovieIdValidator = Joi.object<MovieIdRequest>({
@@ -43,6 +44,9 @@ export const ListMovieValidator = Joi.object<ListMovieRequest>({
   size: Joi.number().integer().positive().min(1).max(100).optional(),
   durationMax: Joi.number().integer().positive().optional(),
   genre: Joi.string().max(100).optional(),
+  title: Joi.string().trim().max(255).optional(),
+  releasedAfter: Joi.date().iso().optional(),
+  releasedBefore: Joi.date().iso().optional(),
 })
   .messages({
     "number.base": "must be a number",
