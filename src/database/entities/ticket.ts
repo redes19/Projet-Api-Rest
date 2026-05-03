@@ -13,13 +13,7 @@
 // | screening_id   | INT           | ●        | FK → screenings.id, ON DELETE RESTRICT |
 // | used_at        | TIMESTAMP     | ●        | DEFAULT NOW()                     |
 
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.js";
 import { Screening } from "./screening.js";
 

@@ -6,11 +6,7 @@ import { JwtUserPayload } from "../types/express.js";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "default";
 
-export const AuthMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const AuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader?.split(" ")[1];
   if (!token) {

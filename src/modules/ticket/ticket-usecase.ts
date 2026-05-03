@@ -1,10 +1,6 @@
 import { Repository } from "typeorm";
 import { Screening } from "../../database/entities/screening.js";
-import {
-  Ticket,
-  TicketType,
-  TicketUsage,
-} from "../../database/entities/ticket.js";
+import { Ticket, TicketType, TicketUsage } from "../../database/entities/ticket.js";
 import { User } from "../../database/entities/user.js";
 
 interface CreateTicketData {
@@ -51,10 +47,7 @@ export type UseTicketResult =
   | { ok: true; usage: TicketUsage }
   | {
       ok: false;
-      reason:
-        | "NO_REMAINING_USES"
-        | "ALREADY_USED_FOR_SCREENING"
-        | "SCREENING_IN_MAINTENANCE";
+      reason: "NO_REMAINING_USES" | "ALREADY_USED_FOR_SCREENING" | "SCREENING_IN_MAINTENANCE";
     };
 
 export class TicketUsecase {
@@ -197,10 +190,7 @@ export class TicketUsecase {
     };
   }
 
-  async useTicket({
-    ticket,
-    screening,
-  }: UseTicketData): Promise<UseTicketResult> {
+  async useTicket({ ticket, screening }: UseTicketData): Promise<UseTicketResult> {
     if (ticket.remaining_uses <= 0) {
       return {
         ok: false,
@@ -230,19 +220,17 @@ export class TicketUsecase {
       };
     }
 
-    const usage = await this.ticketRepository.manager.transaction(
-      async (manager) => {
-        ticket.remaining_uses -= 1;
-        await manager.getRepository(Ticket).save(ticket);
+    const usage = await this.ticketRepository.manager.transaction(async (manager) => {
+      ticket.remaining_uses -= 1;
+      await manager.getRepository(Ticket).save(ticket);
 
-        const createdUsage = manager.getRepository(TicketUsage).create({
-          ticket,
-          screening,
-        });
+      const createdUsage = manager.getRepository(TicketUsage).create({
+        ticket,
+        screening,
+      });
 
-        return manager.getRepository(TicketUsage).save(createdUsage);
-      }
-    );
+      return manager.getRepository(TicketUsage).save(createdUsage);
+    });
 
     return {
       ok: true,

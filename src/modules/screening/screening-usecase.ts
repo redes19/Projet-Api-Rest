@@ -56,19 +56,18 @@ export class ScreeningUsecase {
   }
 
   async createScreening(screeningData: CreateScreeningData) {
-    if (await this.checkRoomMaintenance(screeningData.room.id))
-      return "MAINTENANCE";
+    if (await this.checkRoomMaintenance(screeningData.room.id)) return "MAINTENANCE";
 
     const start = new Date(screeningData.start_time);
     const end = new Date(screeningData.end_time);
 
-    if (start.getHours() < 9 || end.getHours() > 20) {
+    if (start.getHours() < 9) {
       return "OUTSIDE_OPENING_HOURS";
     }
 
     const existing = await this.screeningRepository
       .createQueryBuilder("s")
-      .where("s.room_id = :s.romm_id", { room_id: screeningData.movie })
+      .where("s.room_id = :room_id", { room_id: screeningData.room.id })
       .andWhere("s.start_time < :end", { end })
       .andWhere("s.end_time > :start", { start })
       .getCount();
@@ -102,9 +101,7 @@ export class ScreeningUsecase {
     await this.screeningRepository.remove(screening);
   }
 
-  async updateScreening(
-    screeningData: UpdateScreeningData
-  ): Promise<Screening | null> {
+  async updateScreening(screeningData: UpdateScreeningData): Promise<Screening | null> {
     const screening = await this.screeningRepository.findOneBy({
       id: screeningData.id,
     });
@@ -173,9 +170,6 @@ export class ScreeningUsecase {
       .createQueryBuilder("screening")
       .leftJoinAndSelect("screening.movie", "movie")
       .leftJoinAndSelect("screening.room", "room");
-
-    // TODO: Afficher les salles en maintenance pour les admins
-    query.andWhere("room.is_maintenance = false");
 
     if (movieId !== undefined) {
       query.andWhere("movie.id = :movieId", { movieId });

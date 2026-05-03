@@ -17,9 +17,7 @@ export const CreateRoom = async (req: Request, res: Response) => {
   const validation = CreateRoomValidator.validate(req.body);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const roomUseCase = new RoomUsecase(
@@ -54,9 +52,7 @@ export const GetRoom = async (req: Request, res: Response) => {
   const validation = RoomIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const roomIdRequest = validation.value;
@@ -82,9 +78,7 @@ export const UpdateRoom = async (req: Request, res: Response) => {
   });
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const updateRoomRequest = validation.value;
@@ -120,9 +114,7 @@ export const DeleteRoom = async (req: Request, res: Response) => {
   const validation = RoomIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const roomIdRequest = validation.value;
@@ -146,9 +138,7 @@ export const ListRooms = async (req: Request, res: Response) => {
   const validation = ListRoomValidator.validate(req.query);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const listRoomRequest = validation.value;
@@ -185,9 +175,7 @@ export const GetRoomScreenings = async (req: Request, res: Response) => {
 
   const validation = RoomScreeningsValidator.validate(req.query);
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const usecase = new RoomUsecase(

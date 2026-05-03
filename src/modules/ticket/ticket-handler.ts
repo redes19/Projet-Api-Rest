@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../../database/database.js";
 import { Screening } from "../../database/entities/screening.js";
-import {
-  Ticket,
-  TicketType,
-  TicketUsage,
-} from "../../database/entities/ticket.js";
+import { Ticket, TicketType, TicketUsage } from "../../database/entities/ticket.js";
 import { User } from "../../database/entities/user.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { TicketUsecase } from "./ticket-usecase.js";
@@ -31,9 +27,7 @@ export const CreateTicket = async (req: Request, res: Response) => {
   const validation = CreateTicketValidator.validate(req.body);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const ticketUsecase = buildTicketUsecase();
@@ -64,9 +58,7 @@ export const GetTicket = async (req: Request, res: Response) => {
   const validation = TicketIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const ticketUsecase = buildTicketUsecase();
@@ -88,9 +80,7 @@ export const UpdateTicket = async (req: Request, res: Response) => {
   });
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const ticketUsecase = buildTicketUsecase();
@@ -132,9 +122,7 @@ export const DeleteTicket = async (req: Request, res: Response) => {
   const validation = TicketIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const ticketUsecase = buildTicketUsecase();
@@ -154,9 +142,7 @@ export const ListTickets = async (req: Request, res: Response) => {
   const validation = ListTicketValidator.validate(req.query);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const listTicketRequest = validation.value;
@@ -187,17 +173,13 @@ export const UseTicket = async (req: Request, res: Response) => {
   const ticketIdValidation = TicketIdValidator.validate(req.params);
 
   if (ticketIdValidation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(ticketIdValidation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(ticketIdValidation.error.details));
   }
 
   const bodyValidation = UseTicketValidator.validate(req.body);
 
   if (bodyValidation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(bodyValidation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(bodyValidation.error.details));
   }
 
   const ticketUsecase = buildTicketUsecase();
@@ -209,9 +191,7 @@ export const UseTicket = async (req: Request, res: Response) => {
     });
   }
 
-  const screening = await ticketUsecase.getScreening(
-    bodyValidation.value.screening_id
-  );
+  const screening = await ticketUsecase.getScreening(bodyValidation.value.screening_id);
 
   if (!screening) {
     return res.status(404).send({
@@ -249,17 +229,13 @@ export const ListTicketUsages = async (req: Request, res: Response) => {
   const ticketIdValidation = TicketIdValidator.validate(req.params);
 
   if (ticketIdValidation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(ticketIdValidation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(ticketIdValidation.error.details));
   }
 
   const queryValidation = ListTicketUsageValidator.validate(req.query);
 
   if (queryValidation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(queryValidation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(queryValidation.error.details));
   }
 
   const ticketUsecase = buildTicketUsecase();

@@ -30,12 +30,3 @@ export interface ListMovieRequest {
   releasedAfter?: Date | undefined;
   releasedBefore?: Date | undefined;
 }
-
-export interface ListMovieFilter {
-  title?: string;
-  genre?: string;
-  releasedAfter?: Date;
-  releasedBefore?: Date;
-  page?: number;
-  size?: number;
-}
