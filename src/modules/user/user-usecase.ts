@@ -1,6 +1,7 @@
 import { QueryFailedError, Repository } from "typeorm";
 import { User, UserRole } from "../../database/entities/user.js";
 import { ResourceConflictError } from "../../utils/errors.js";
+import { hash } from "bcrypt";
 
 interface CreateUserData {
   email: string;
@@ -38,17 +39,17 @@ export class UserUsecase {
   constructor(private userRepository: Repository<User>) {}
 
   async createUser(userData: CreateUserData) {
-    // TODO: Hash password
     try {
+      const hashedPassword = await hash(userData.password, 10);
       const user = this.userRepository.create({
         email: userData.email,
-        password: userData.password,
+        password: hashedPassword,
         role: userData.role,
         balance: userData.balance,
         first_name: userData.first_name || null,
         last_name: userData.last_name || null,
       });
-      return this.userRepository.save(user);
+      return await this.userRepository.save(user);
     } catch (error) {
       if (error instanceof QueryFailedError) {
         const code = (error.driverError as { code: string }).code;
@@ -82,8 +83,12 @@ export class UserUsecase {
     if (!user) {
       return null;
     }
+
+    if (userData.password) {
+      userData.password = await hash(userData.password, 10);
+    }
+
     try {
-      // TODO: Hash password si mis à jour
       this.userRepository.merge(user, userData);
 
       return await this.userRepository.save(user);
@@ -99,11 +104,7 @@ export class UserUsecase {
     }
   }
 
-  async listUsers({
-    page,
-    size,
-    balanceMax,
-  }: ListUserFilter): Promise<ListResponse<User>> {
+  async listUsers({ page, size, balanceMax }: ListUserFilter): Promise<ListResponse<User>> {
     const query = this.userRepository.createQueryBuilder("user");
     if (balanceMax !== undefined) {
       query.andWhere("user.balance <= :balanceMax", { balanceMax });

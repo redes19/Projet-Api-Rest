@@ -26,6 +26,7 @@ export enum UserRole {
   CLIENT = "client",
   EMPLOYEE = "employee",
   ADMIN = "admin",
+  SUPER_ADMIN = "super_admin",
 }
 
 @Entity({ name: "users" })
@@ -48,8 +49,7 @@ export class User {
     default: 0,
     transformer: {
       to: (value: number): number => value,
-      from: (value: string | null): number =>
-        value === null ? 0 : parseFloat(value),
+      from: (value: string | null): number => (value === null ? 0 : parseFloat(value)),
     },
   })
   balance: number;

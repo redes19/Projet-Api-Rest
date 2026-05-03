@@ -14,14 +14,12 @@ export const CreateScreeningValidator = Joi.object<CreateScreeningRequest>({
   movie_id: Joi.number().integer().positive().required(),
   room_id: Joi.number().integer().positive().required(),
   start_time: Joi.date().required(),
-  end_time: Joi.date().greater(Joi.ref("start_time")).required(),
 }).messages({
   "any.required": "is required",
   "number.base": "must be a number",
   "number.integer": "must be an integer",
   "number.min": "must be greater than or equal to {#limit}",
   "date.base": "must be a valid date",
-  "date.greater": "must be greater than ref:start_time",
 });
 
 export const UpdateScreeningValidator = Joi.object<UpdateScreeningRequest>({

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../database/database.js";
 import { Movie } from "../../database/entities/movie.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
-import { MovieUsecase } from "./movie-usecase.js";
+import { MovieUsecase, type ListMovieFilter } from "./movie-usecase.js";
 import {
   CreateMovieValidator,
   ListMovieValidator,
@@ -14,17 +14,22 @@ export const CreateMovie = async (req: Request, res: Response) => {
   const validation = CreateMovieValidator.validate(req.body);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const movieUseCase = new MovieUsecase(AppDataSource.getRepository(Movie));
 
   try {
     const movie = await movieUseCase.createMovie(validation.value);
+
+    if (!movie) {
+      return res.status(409).send({
+        title: "title is already taken",
+      });
+    }
+
     return res.status(201).send(movie);
-  } catch (_error: unknown) {
+  } catch (error: unknown) {
     return res.status(500).send({
       error: "Internal Server Error",
     });
@@ -35,9 +40,7 @@ export const GetMovie = async (req: Request, res: Response) => {
   const validation = MovieIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const movieIdRequest = validation.value;
@@ -60,9 +63,7 @@ export const UpdateMovie = async (req: Request, res: Response) => {
   });
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const updateMovieRequest = validation.value;
@@ -78,7 +79,7 @@ export const UpdateMovie = async (req: Request, res: Response) => {
   try {
     const updatedMovie = await movieUsecase.updateMovie(validation.value);
     return res.send(updatedMovie);
-  } catch (_error: unknown) {
+  } catch (error: unknown) {
     return res.status(500).send({
       error: "Internal Server Error",
     });
@@ -89,9 +90,7 @@ export const DeleteMovie = async (req: Request, res: Response) => {
   const validation = MovieIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const movieIdRequest = validation.value;
@@ -112,9 +111,7 @@ export const ListMovies = async (req: Request, res: Response) => {
   const validation = ListMovieValidator.validate(req.query);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const listMovieRequest = validation.value;
@@ -130,12 +127,23 @@ export const ListMovies = async (req: Request, res: Response) => {
   }
 
   const movieUsecase = new MovieUsecase(AppDataSource.getRepository(Movie));
-  const movies = await movieUsecase.listMovies({
+  const listMovieFilter: ListMovieFilter = {
     page,
     size,
-    durationMax: listMovieRequest.durationMax,
-    genre: listMovieRequest.genre,
-  });
+    ...(listMovieRequest.durationMax !== undefined
+      ? { durationMax: listMovieRequest.durationMax }
+      : {}),
+    ...(listMovieRequest.genre !== undefined ? { genre: listMovieRequest.genre } : {}),
+    ...(listMovieRequest.title !== undefined ? { title: listMovieRequest.title } : {}),
+    ...(listMovieRequest.releasedAfter !== undefined
+      ? { releasedAfter: listMovieRequest.releasedAfter }
+      : {}),
+    ...(listMovieRequest.releasedBefore !== undefined
+      ? { releasedBefore: listMovieRequest.releasedBefore }
+      : {}),
+  };
+
+  const movies = await movieUsecase.listMovies(listMovieFilter);
 
   return res.send(movies.data);
 };

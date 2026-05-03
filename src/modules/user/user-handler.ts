@@ -15,9 +15,7 @@ export const CreateUser = async (req: Request, res: Response) => {
   const validation = CreateUserValidator.validate(req.body);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const userUseCase = new UserUsecase(AppDataSource.getRepository(User));
@@ -49,9 +47,7 @@ export const CreateUser = async (req: Request, res: Response) => {
 export const GetUser = async (req: Request, res: Response) => {
   const validation = UserIdValidator.validate(req.params);
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
   const userIdRequest = validation.value;
   const userUsecase = new UserUsecase(AppDataSource.getRepository(User));
@@ -74,9 +70,7 @@ export const UpdateUser = async (req: Request, res: Response) => {
     ...req.body,
   });
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
   const updateUserRequest = validation.value;
 
@@ -107,9 +101,7 @@ export const UpdateUser = async (req: Request, res: Response) => {
 export const DeleteUser = async (req: Request, res: Response) => {
   const validation = UserIdValidator.validate(req.params);
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
   const userIdRequest = validation.value;
   const userUsecase = new UserUsecase(AppDataSource.getRepository(User));
@@ -126,9 +118,7 @@ export const DeleteUser = async (req: Request, res: Response) => {
 export const ListUsers = async (req: Request, res: Response) => {
   const validation = ListUserValidator.validate(req.query);
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
   const listUserRequest = validation.value;
   let size = 10;

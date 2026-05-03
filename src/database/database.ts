@@ -17,14 +17,5 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME ?? "database",
   synchronize: true,
   logging: true,
-  entities: [
-    User,
-    Token,
-    Movie,
-    Room,
-    Screening,
-    Ticket,
-    TicketUsage,
-    Transaction,
-  ],
+  entities: [User, Token, Movie, Room, Screening, Ticket, TicketUsage, Transaction],
 });

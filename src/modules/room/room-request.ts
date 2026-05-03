@@ -31,3 +31,8 @@ export interface ListRoomRequest {
   capacityMax?: number;
   isMaintenance?: boolean;
 }
+
+export interface RoomScreeningsRequest {
+  from?: Date | undefined;
+  to?: Date | undefined;
+}

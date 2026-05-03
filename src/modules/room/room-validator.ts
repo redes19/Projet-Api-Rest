@@ -4,6 +4,7 @@ import {
   ListRoomRequest,
   RoomIdRequest,
   UpdateRoomRequest,
+  RoomScreeningsRequest,
 } from "./room-request.js";
 
 export const RoomIdValidator = Joi.object<RoomIdRequest>({
@@ -56,3 +57,8 @@ export const ListRoomValidator = Joi.object<ListRoomRequest>({
     "any.required": "is required",
   })
   .options({ abortEarly: false });
+
+export const RoomScreeningsValidator = Joi.object<RoomScreeningsRequest>({
+  from: Joi.date().iso().optional(),
+  to: Joi.date().iso().greater(Joi.ref("from")).optional(),
+}).options({ abortEarly: false });
