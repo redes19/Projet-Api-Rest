@@ -1,5 +1,6 @@
 import Joi from "joi";
 import {
+  BuyTicketRequest,
   CreateTicketRequest,
   ListTicketRequest,
   ListTicketUsageRequest,
@@ -70,3 +71,10 @@ export const ListTicketUsageValidator = Joi.object<ListTicketUsageRequest>({
     "number.max": "must be less than or equal to {#limit}",
   })
   .options({ abortEarly: false });
+
+export const BuyTicketValidator = Joi.object<BuyTicketRequest>({
+  type: Joi.string().valid("normal", "super").required(),
+}).messages({
+  "any.required": "is required",
+  "string.base": "must be a string",
+});

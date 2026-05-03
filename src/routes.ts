@@ -29,6 +29,7 @@ import {
   UpdateScreening,
 } from "./modules/screening/screening-handler.js";
 import {
+  BuyTicket,
   CreateTicket,
   DeleteTicket,
   GetTicket,
@@ -42,6 +43,7 @@ import { Login, Register, Refresh, Logout } from "./modules/auth/auth-handler.js
 import { RequireRole } from "./middleware/role.middleware.js";
 import { UserRole } from "./database/entities/user.js";
 import { DepositBalance, GetBalance, WithdrawBalance } from "./modules/balance/balance-handler.js";
+import { ListTransactions } from "./modules/transaction/transaction-handler.js";
 
 export const initHandlers = (app: Application) => {
   app.get("/", (req: Request, res: Response) => {
@@ -1480,6 +1482,35 @@ export const initHandlers = (app: Application) => {
    */
   app.get("/tickets/:id/usages", AuthMiddleware, ListTicketUsages);
 
+  /**
+   * @openapi
+   * /tickets/buy/{type}:
+   *  post:
+   *    tags: [Tickets]
+   *    summary: Acheter un ticket
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: path
+   *        name: type
+   *        required: true
+   *        schema:
+   *          type: string
+   *          enum: [normal, super]
+   *    responses:
+   *      201:
+   *        description: Ticket acheté avec succès.
+   *      400:
+   *        description: Requête invalide ou solde insuffisant.
+   *      401:
+   *        description: Non autorisé.
+   *      404:
+   *        description: Utilisateur non trouvé.
+   *      500:
+   *        description: Erreur interne du serveur.
+   */
+  app.post("/tickets/buy/:type", AuthMiddleware, BuyTicket);
+
   // ========================================
   //                BALANCE
   // ========================================
@@ -1567,4 +1598,69 @@ export const initHandlers = (app: Application) => {
    *        description: Erreur interne du serveur.
    */
   app.post("/balance/withdraw", AuthMiddleware, WithdrawBalance);
+
+  // ========================================
+  //              TRANSACTIONS
+  // ========================================
+
+  /**
+   * @openapi
+   * /transactions:
+   *  get:
+   *    tags: [Transactions]
+   *    summary: Liste les transactions
+   *    description: Les administrateurs voient toutes les transactions, les utilisateurs voient uniquement les leurs.
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: query
+   *        name: page
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *        description: Numero de page
+   *      - in: query
+   *        name: size
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *          maximum: 100
+   *        description: Nombre d'elements par page
+   *      - in: query
+   *        name: userId
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *        description: Filtre par utilisateur (ADMIN)
+   *      - in: query
+   *        name: type
+   *        schema:
+   *          type: string
+   *          enum: [deposit, withdraw, ticket_purchase]
+   *        description: Filtre par type de transaction
+   *      - in: query
+   *        name: from
+   *        schema:
+   *          type: string
+   *          format: date-time
+   *        description: Date de debut (ISO 8601)
+   *      - in: query
+   *        name: to
+   *        schema:
+   *          type: string
+   *          format: date-time
+   *        description: Date de fin (ISO 8601)
+   *    responses:
+   *      200:
+   *        description: Liste des transactions.
+   *      400:
+   *        description: Requete invalide.
+   *      401:
+   *        description: Non autorise.
+   *      403:
+   *        description: Acces interdit.
+   *      500:
+   *        description: Erreur interne du serveur.
+   */
+  app.get("/transactions", AuthMiddleware, ListTransactions);
 };
