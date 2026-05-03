@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../../database/database.js";
+import { Transaction } from "../../database/entities/transaction.js";
 import { User } from "../../database/entities/user.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { BalanceUsecase } from "./balance-usecase.js";
 import { BalanceIdValidator, DepositBalanceValidator } from "./balance-validator.js";
 
 const buildBalanceUsecase = () => {
-  return new BalanceUsecase(AppDataSource.getRepository(User));
+  return new BalanceUsecase(
+    AppDataSource.getRepository(User),
+    AppDataSource.getRepository(Transaction)
+  );
 };
 
 export const GetBalance = async (req: Request, res: Response) => {

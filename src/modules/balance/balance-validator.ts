@@ -4,6 +4,6 @@ export const BalanceIdValidator = Joi.object<{ id: number }>({
   id: Joi.number().integer().positive().required(),
 });
 
-export const DepositBalanceValidator = Joi.object<{ amount: number; user_id: number }>({
+export const DepositBalanceValidator = Joi.object<{ amount: number }>({
   amount: Joi.number().positive().required(),
 });
