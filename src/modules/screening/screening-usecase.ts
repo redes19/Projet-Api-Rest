@@ -2,6 +2,7 @@ import { Repository } from "typeorm";
 import { Movie } from "../../database/entities/movie.js";
 import { Room } from "../../database/entities/room.js";
 import { Screening } from "../../database/entities/screening.js";
+import { TicketUsage } from "../../database/entities/ticket.js";
 
 interface CreateScreeningData {
   movie: Movie;
@@ -35,11 +36,18 @@ export interface ListScreeningFilter {
   to?: Date | undefined;
 }
 
+export interface ScreeningStats {
+  screening: Screening;
+  ticketsSold: number;
+  spectators: number;
+}
+
 export class ScreeningUsecase {
   constructor(
     private screeningRepository: Repository<Screening>,
     private movieRepository: Repository<Movie>,
-    private roomRepository: Repository<Room>
+    private roomRepository: Repository<Room>,
+    private ticketUsageRepository?: Repository<TicketUsage>
   ) {}
 
   async getMovie(id: number) {
@@ -199,6 +207,33 @@ export class ScreeningUsecase {
       page,
       totalCount,
       totalPages: Math.ceil(totalCount / size),
+    };
+  }
+
+  /**
+   * Stats admin sur une séance : nombre de billets vendus / spectateurs.
+   * Un "billet vendu" = une utilisation de ticket sur cette séance.
+   */
+  async getScreeningStats(id: number): Promise<ScreeningStats | null> {
+    if (!this.ticketUsageRepository) {
+      throw new Error(
+        "ticketUsageRepository must be injected to call getScreeningStats"
+      );
+    }
+
+    const screening = await this.getScreening(id);
+    if (!screening) return null;
+
+    const ticketsSold = await this.ticketUsageRepository
+      .createQueryBuilder("usage")
+      .leftJoin("usage.screening", "screening")
+      .where("screening.id = :id", { id })
+      .getCount();
+
+    return {
+      screening,
+      ticketsSold,
+      spectators: ticketsSold, // 1 utilisation = 1 spectateur
     };
   }
 }

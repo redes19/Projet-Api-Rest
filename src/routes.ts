@@ -28,6 +28,7 @@ import {
   GetScreening,
   ListScreenings,
   UpdateScreening,
+  GetScreeningStats,
 } from "./modules/screening/screening-handler.js";
 import {
   BuyTicket,
@@ -1119,6 +1120,41 @@ export const initHandlers = (app: Application) => {
    *        description: Séance non trouvée.
    */
   app.get("/screenings/:id", AuthMiddleware, GetScreening);
+
+  /**
+   * @openapi
+   * /screenings/{id}/stats:
+   *  get:
+   *    tags: [Screenings]
+   *    summary: Statistiques d'une séance (ADMIN)
+   *    description: Retourne le nombre de billets vendus et de spectateurs pour la séance.
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: path
+   *        name: id
+   *        required: true
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *    responses:
+   *      200:
+   *        description: Statistiques de la séance
+   *      400:
+   *        description: Requête invalide.
+   *      401:
+   *        description: Non autorisé.
+   *      403:
+   *        description: Accès interdit.
+   *      404:
+   *        description: Séance non trouvée.
+   */
+  app.get(
+    "/screenings/:id/stats",
+    AuthMiddleware,
+    RequireRole(UserRole.ADMIN),
+    GetScreeningStats
+  );
 
   /**
    * @openapi
