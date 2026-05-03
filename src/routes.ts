@@ -29,6 +29,7 @@ import {
   UpdateScreening,
 } from "./modules/screening/screening-handler.js";
 import {
+  BuyTicket,
   CreateTicket,
   DeleteTicket,
   GetTicket,
@@ -1480,6 +1481,35 @@ export const initHandlers = (app: Application) => {
    *        description: Erreur interne du serveur.
    */
   app.get("/tickets/:id/usages", AuthMiddleware, ListTicketUsages);
+
+  /**
+   * @openapi
+   * /tickets/buy/{type}:
+   *  post:
+   *    tags: [Tickets]
+   *    summary: Acheter un ticket
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: path
+   *        name: type
+   *        required: true
+   *        schema:
+   *          type: string
+   *          enum: [normal, super]
+   *    responses:
+   *      201:
+   *        description: Ticket acheté avec succès.
+   *      400:
+   *        description: Requête invalide ou solde insuffisant.
+   *      401:
+   *        description: Non autorisé.
+   *      404:
+   *        description: Utilisateur non trouvé.
+   *      500:
+   *        description: Erreur interne du serveur.
+   */
+  app.post("/tickets/buy/:type", AuthMiddleware, BuyTicket);
 
   // ========================================
   //                BALANCE
