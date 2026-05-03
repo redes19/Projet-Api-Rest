@@ -3,7 +3,12 @@ import { AppDataSource } from "../../database/database.js";
 import { Movie } from "../../database/entities/movie.js";
 import { Room } from "../../database/entities/room.js";
 import { Screening } from "../../database/entities/screening.js";
-import { hasMinimumScreeningDuration, isWithinCinemaOpeningHours } from "../../utils/dates.js";
+import { TicketUsage } from "../../database/entities/ticket.js";
+import {
+  hasMinimumScreeningDuration,
+  isWithinCinemaOpeningHours,
+  isCinemaOpenOnDay,
+} from "../../utils/dates.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { ScreeningUsecase } from "./screening-usecase.js";
 import {
@@ -49,9 +54,15 @@ export const CreateScreening = async (req: Request, res: Response) => {
   const startTime = validation.value.start_time;
   const endTime = new Date(startTime.getTime() + (movie.duration + 30) * 60000);
 
-  if (!isWithinCinemaOpeningHours(startTime)) {
+  if (!isCinemaOpenOnDay(startTime)) {
     return res.status(400).send({
-      error: "screening must start between 09:00 and 20:00",
+      error: "cinema is closed on weekends (open Monday to Friday)",
+    });
+  }
+
+  if (!isWithinCinemaOpeningHours(startTime, endTime)) {
+    return res.status(400).send({
+      error: "screening must take place between 09:00 and 20:00",
     });
   }
 
@@ -183,9 +194,15 @@ export const UpdateScreening = async (req: Request, res: Response) => {
     });
   }
 
-  if (!isWithinCinemaOpeningHours(finalStartTime)) {
+  if (!isCinemaOpenOnDay(finalStartTime)) {
     return res.status(400).send({
-      error: "screening must start between 09:00 and 20:00",
+      error: "cinema is closed on weekends (open Monday to Friday)",
+    });
+  }
+
+  if (!isWithinCinemaOpeningHours(finalStartTime, finalEndTime)) {
+    return res.status(400).send({
+      error: "screening must take place between 09:00 and 20:00",
     });
   }
 
@@ -286,4 +303,27 @@ export const ListScreenings = async (req: Request, res: Response) => {
   });
 
   return res.send(screenings.data);
+};
+
+export const GetScreeningStats = async (req: Request, res: Response) => {
+  const validation = ScreeningIdValidator.validate(req.params);
+
+  if (validation.error) {
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
+  }
+
+  const screeningUsecase = new ScreeningUsecase(
+    AppDataSource.getRepository(Screening),
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Room),
+    AppDataSource.getRepository(TicketUsage)
+  );
+
+  const stats = await screeningUsecase.getScreeningStats(validation.value.id);
+
+  if (!stats) {
+    return res.status(404).send({ error: "screening not found" });
+  }
+
+  return res.send(stats);
 };
