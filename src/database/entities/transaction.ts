@@ -2,7 +2,7 @@
 // | ----------- | ------------- | -------- | ---------------------------------------- |
 // | id          | SERIAL        | ●        | PK                                       |
 // | user_id     | INT           | ●        | FK → users.id, ON DELETE RESTRICT        |
-// | type        | VARCHAR(20)   | ●        | deposit \| withdrawal \| ticket_purchase |
+// | type        | VARCHAR(20)   | ●        | deposit \| withdraw \| ticket_purchase |
 // | amount      | NUMERIC(10,2) | ●        | + crédit, - débit                        |
 // | description | TEXT          | ○        |                                          |
 // | created_at  | TIMESTAMP     | ●        | DEFAULT NOW()                            |
@@ -17,6 +17,12 @@ import {
 } from "typeorm";
 import { User } from "./user.js";
 
+export enum TransactionType {
+  DEPOSIT = "deposit",
+  WITHDRAW = "withdraw",
+  TICKET_PURCHASE = "ticket_purchase",
+}
+
 @Entity()
 export class Transaction {
   @PrimaryGeneratedColumn()
@@ -26,8 +32,8 @@ export class Transaction {
   @JoinColumn({ name: "user_id" })
   user: User;
 
-  @Column({ type: "varchar", length: 20, nullable: false })
-  type: string;
+  @Column({ type: "enum", enum: TransactionType, nullable: false })
+  type: TransactionType;
 
   @Column({
     type: "numeric",
@@ -50,7 +56,7 @@ export class Transaction {
   constructor(
     id: number,
     user: User,
-    type: string,
+    type: TransactionType,
     amount: number,
     description: string | null,
     created_at: Date

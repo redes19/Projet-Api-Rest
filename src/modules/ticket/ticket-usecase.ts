@@ -1,7 +1,9 @@
 import { Repository } from "typeorm";
 import { Screening } from "../../database/entities/screening.js";
 import { Ticket, TicketType, TicketUsage } from "../../database/entities/ticket.js";
+import { Transaction, TransactionType } from "../../database/entities/transaction.js";
 import { User } from "../../database/entities/user.js";
+import { BuyTicketResult, UseTicketResult } from "./ticket-request.js";
 
 interface CreateTicketData {
   user: User;
@@ -19,6 +21,12 @@ interface UpdateTicketData {
 interface UseTicketData {
   ticket: Ticket;
   screening: Screening;
+}
+
+interface BuyTicketData {
+  userId: number;
+  type: TicketType;
+  price: number;
 }
 
 export interface ListResponse<T> {
@@ -42,13 +50,6 @@ export interface ListTicketUsageFilter {
   page: number;
   size: number;
 }
-
-export type UseTicketResult =
-  | { ok: true; usage: TicketUsage }
-  | {
-      ok: false;
-      reason: "NO_REMAINING_USES" | "ALREADY_USED_FOR_SCREENING" | "SCREENING_IN_MAINTENANCE";
-    };
 
 export class TicketUsecase {
   constructor(
@@ -236,5 +237,55 @@ export class TicketUsecase {
       ok: true,
       usage,
     };
+  }
+
+  async buyTicket({ userId, type, price }: BuyTicketData): Promise<BuyTicketResult> {
+    return this.ticketRepository.manager.transaction(async (manager) => {
+      const userRepository = manager.getRepository(User);
+      const ticketRepository = manager.getRepository(Ticket);
+      const transactionRepository = manager.getRepository(Transaction);
+
+      const user = await userRepository.findOneBy({ id: userId });
+      if (!user) {
+        return {
+          ok: false,
+          reason: "USER_NOT_FOUND",
+        };
+      }
+
+      if (user.balance < price) {
+        return {
+          ok: false,
+          reason: "INSUFFICIENT_BALANCE",
+        };
+      }
+
+      user.balance -= price;
+      await userRepository.save(user);
+
+      const defaultRemainingUses = type === TicketType.SUPER ? 10 : 1;
+      const ticket = ticketRepository.create({
+        user,
+        type,
+        remaining_uses: defaultRemainingUses,
+      });
+
+      const savedTicket = await ticketRepository.save(ticket);
+
+      await transactionRepository.save(
+        transactionRepository.create({
+          user,
+          type: TransactionType.TICKET_PURCHASE,
+          amount: -price,
+          description: `Ticket purchase (${type})`,
+        })
+      );
+
+      return {
+        ok: true,
+        ticket: savedTicket,
+        balance: user.balance,
+      };
+    });
   }
 }

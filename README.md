@@ -108,3 +108,47 @@ src/
             ├── ticket.schema.ts
             └── transaction.schema.ts
 ```
+
+## Fonctionnalités Réalisées
+
+### Gestion des Salles
+
+- [x] **CRUD Complet** : Implémentation de la création, lecture, mise à jour et suppression des salles.
+- [x] **Spécifications** : Chaque salle intègre un nom, une description, des images, un type et une capacité comprise entre 15 et 30 places.
+- [x] **Maintenance** : Possibilité pour les administrateurs de passer une salle en maintenance, masquant automatiquement les séances associées aux utilisateurs.
+- [x] **Planning** : Consultation du planning d'une salle spécifique sur une période donnée pour les utilisateurs authentifiés.
+
+### Gestion des Films et Séances
+
+- [x] **Catalogue Films** : CRUD pour les administrateurs et consultation pour tous les utilisateurs.
+- [x] **Séances** : Gestion des séances par les administrateurs (ajout, modification, suppression).
+- [x] **Règles Métier** : Calcul automatique de la durée (film + 30 min de nettoyage/pub) et interdiction des chevauchements dans une même salle.
+- [x] **Consultation** : Recherche de séances par film ou par période.
+
+### Authentification et Utilisateurs
+
+- [x] **Sécurité** : Authentification par token stateful avec mécanisme de refresh token.
+- [x] **Gestion des Sessions** : Durée de validité des access_token fixée à 5 minutes maximum et système de logout.
+- [x] **Rôles** : Distinction entre Administrateurs et Clients.
+
+### Billetterie et Finance
+
+- [x] **Achat** : Système de vente de billets simples et de "Super Billets" (10 séances).
+- [x] **Portefeuille** : Gestion du solde utilisateur en euros (dépôt, retrait, historique des transactions).
+- [x] **Contrôle** : Vérification systématique du solde avant achat.
+
+### Statistiques et Administration Avancée
+
+- [ ] Suivi en temps réel du taux de fréquentation et affluence hebdomadaire.
+- [ ] Visualisation par l'administrateur du nombre de billets vendus par séance.
+- [ ] Tracking détaillé de l'activité des utilisateurs (films vus).
+
+### Technique et Infrastructure
+
+- [x] Mise en production avec support HTTPS.
+- [x] Dockerisation de l'application (image de production sans TypeScript).
+- [x] Documentation OpenAPI / Swagger.
+
+### Bonus
+
+- [x] Pipeline CI/CD et gestion des race conditions.

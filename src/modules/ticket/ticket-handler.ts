@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { AppDataSource } from "../../database/database.js";
 import { Screening } from "../../database/entities/screening.js";
 import { Ticket, TicketType, TicketUsage } from "../../database/entities/ticket.js";
-import { User } from "../../database/entities/user.js";
+import { User, UserRole } from "../../database/entities/user.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { TicketUsecase } from "./ticket-usecase.js";
 import {
+  BuyTicketValidator,
   CreateTicketValidator,
   ListTicketUsageValidator,
   ListTicketValidator,
@@ -13,6 +14,9 @@ import {
   UpdateTicketValidator,
   UseTicketValidator,
 } from "./ticket-validator.js";
+
+const TICKET_PRICE_SUPER = 90;
+const TICKET_PRICE_NORMAL = 10;
 
 const buildTicketUsecase = () => {
   return new TicketUsecase(
@@ -139,6 +143,10 @@ export const DeleteTicket = async (req: Request, res: Response) => {
 };
 
 export const ListTickets = async (req: Request, res: Response) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   const validation = ListTicketValidator.validate(req.query);
 
   if (validation.error) {
@@ -157,11 +165,23 @@ export const ListTickets = async (req: Request, res: Response) => {
     page = listTicketRequest.page;
   }
 
+  const isAdmin = req.user.role === UserRole.ADMIN;
+
+  if (
+    !isAdmin &&
+    listTicketRequest.userId !== undefined &&
+    listTicketRequest.userId !== req.user.userId
+  ) {
+    return res.status(403).send({ error: "Forbidden" });
+  }
+
+  const userId = isAdmin ? listTicketRequest.userId : req.user.userId;
+
   const ticketUsecase = buildTicketUsecase();
   const tickets = await ticketUsecase.listTickets({
     page,
     size,
-    userId: listTicketRequest.userId,
+    userId,
     type: listTicketRequest.type as TicketType | undefined,
     availableOnly: listTicketRequest.availableOnly,
   });
@@ -264,4 +284,39 @@ export const ListTicketUsages = async (req: Request, res: Response) => {
   });
 
   return res.send(usages.data);
+};
+
+export const BuyTicket = async (req: Request, res: Response) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const validation = BuyTicketValidator.validate(req.params);
+  if (validation.error) {
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
+  }
+
+  const ticketType = validation.value.type as TicketType;
+  const price = ticketType === TicketType.SUPER ? TICKET_PRICE_SUPER : TICKET_PRICE_NORMAL;
+
+  if (!Number.isFinite(price) || price <= 0) {
+    return res.status(500).send({ error: "invalid ticket price configuration" });
+  }
+
+  const ticketUsecase = buildTicketUsecase();
+  const result = await ticketUsecase.buyTicket({
+    userId: req.user.userId,
+    type: ticketType,
+    price,
+  });
+
+  if (!result.ok) {
+    if (result.reason === "USER_NOT_FOUND") {
+      return res.status(404).send({ error: "user not found" });
+    }
+
+    return res.status(400).send({ error: "Insufficient balance" });
+  }
+
+  return res.status(201).send({ ticket: result.ticket, balance: result.balance });
 };
