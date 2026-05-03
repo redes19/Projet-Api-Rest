@@ -3,10 +3,7 @@ import { AppDataSource } from "../../database/database.js";
 import { Movie } from "../../database/entities/movie.js";
 import { Room } from "../../database/entities/room.js";
 import { Screening } from "../../database/entities/screening.js";
-import {
-  hasMinimumScreeningDuration,
-  isWithinCinemaOpeningHours,
-} from "../../utils/dates.js";
+import { hasMinimumScreeningDuration, isWithinCinemaOpeningHours } from "../../utils/dates.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { ScreeningUsecase } from "./screening-usecase.js";
 import {
@@ -20,9 +17,7 @@ export const CreateScreening = async (req: Request, res: Response) => {
   const validation = CreateScreeningValidator.validate(req.body);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const screeningUsecase = new ScreeningUsecase(
@@ -52,7 +47,7 @@ export const CreateScreening = async (req: Request, res: Response) => {
   }
 
   const startTime = validation.value.start_time;
-  const endTime = validation.value.end_time;
+  const endTime = new Date(startTime.getTime() + (movie.duration + 30) * 60000);
 
   if (!isWithinCinemaOpeningHours(startTime)) {
     return res.status(400).send({
@@ -90,13 +85,11 @@ export const CreateScreening = async (req: Request, res: Response) => {
       return res.status(400).send({ error: "Séance hors créneau 9h-20h" });
     }
     if (screening === "OVERLAP") {
-      return res
-        .status(409)
-        .send({ error: "Une autre séance occupe déjà ce créneau" });
+      return res.status(409).send({ error: "Une autre séance occupe déjà ce créneau" });
     }
 
     return res.status(201).send(screening);
-  } catch (_error: unknown) {
+  } catch (error: unknown) {
     return res.status(500).send({
       error: "Internal Server Error",
     });
@@ -107,9 +100,7 @@ export const GetScreening = async (req: Request, res: Response) => {
   const validation = ScreeningIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const screeningIdRequest = validation.value;
@@ -143,9 +134,7 @@ export const UpdateScreening = async (req: Request, res: Response) => {
   });
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const updateScreeningRequest = validation.value;
@@ -155,9 +144,7 @@ export const UpdateScreening = async (req: Request, res: Response) => {
     AppDataSource.getRepository(Room)
   );
 
-  const existingScreening = await screeningUsecase.getScreening(
-    updateScreeningRequest.id
-  );
+  const existingScreening = await screeningUsecase.getScreening(updateScreeningRequest.id);
 
   if (!existingScreening) {
     return res.status(404).send({
@@ -187,10 +174,8 @@ export const UpdateScreening = async (req: Request, res: Response) => {
 
   const finalMovie = movie ?? existingScreening.movie;
   const finalRoom = room ?? existingScreening.room;
-  const finalStartTime =
-    updateScreeningRequest.start_time ?? existingScreening.start_time;
-  const finalEndTime =
-    updateScreeningRequest.end_time ?? existingScreening.end_time;
+  const finalStartTime = updateScreeningRequest.start_time ?? existingScreening.start_time;
+  const finalEndTime = updateScreeningRequest.end_time ?? existingScreening.end_time;
 
   if (finalRoom.is_maintenance) {
     return res.status(400).send({
@@ -204,13 +189,7 @@ export const UpdateScreening = async (req: Request, res: Response) => {
     });
   }
 
-  if (
-    !hasMinimumScreeningDuration(
-      finalStartTime,
-      finalEndTime,
-      finalMovie.duration
-    )
-  ) {
+  if (!hasMinimumScreeningDuration(finalStartTime, finalEndTime, finalMovie.duration)) {
     return res.status(400).send({
       error: "screening duration must be at least movie duration + 30 minutes",
     });
@@ -239,7 +218,7 @@ export const UpdateScreening = async (req: Request, res: Response) => {
     });
 
     return res.send(updatedScreening);
-  } catch (_error: unknown) {
+  } catch (error: unknown) {
     return res.status(500).send({
       error: "Internal Server Error",
     });
@@ -250,9 +229,7 @@ export const DeleteScreening = async (req: Request, res: Response) => {
   const validation = ScreeningIdValidator.validate(req.params);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const screeningIdRequest = validation.value;
@@ -278,9 +255,7 @@ export const ListScreenings = async (req: Request, res: Response) => {
   const validation = ListScreeningValidator.validate(req.query);
 
   if (validation.error) {
-    return res
-      .status(400)
-      .send(generateValidationErrorMessage(validation.error.details));
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
   const listScreeningRequest = validation.value;

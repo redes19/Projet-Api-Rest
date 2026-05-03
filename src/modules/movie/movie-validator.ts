@@ -4,7 +4,6 @@ import {
   ListMovieRequest,
   MovieIdRequest,
   UpdateMovieRequest,
-  ListMovieFilter,
 } from "./movie-request.js";
 
 export const MovieIdValidator = Joi.object<MovieIdRequest>({

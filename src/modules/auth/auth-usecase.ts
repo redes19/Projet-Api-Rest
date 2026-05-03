@@ -31,6 +31,7 @@ export class AuthUsecase {
       role: UserRole.CLIENT,
       balance: 0,
       first_name: data.firstName ?? null,
+      last_name: data.lastName ?? null,
     });
     const savedUser = await this.userRepository.save(user);
 
@@ -86,11 +87,9 @@ export class AuthUsecase {
       { expiresIn: "5m" }
     );
 
-    const refreshToken = jwt.sign(
-      { userId: user.id, type: "refresh" },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const refreshToken = jwt.sign({ userId: user.id, type: "refresh" }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     const now = Date.now();
     await this.tokenRepository.save([

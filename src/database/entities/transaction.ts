@@ -36,8 +36,7 @@ export class Transaction {
     nullable: false,
     transformer: {
       to: (value: number): number => value,
-      from: (value: string | null): number =>
-        value === null ? 0 : parseFloat(value),
+      from: (value: string | null): number => (value === null ? 0 : parseFloat(value)),
     },
   })
   amount: number;
