@@ -1578,8 +1578,8 @@ export const initHandlers = (app: Application) => {
    * /transactions:
    *  get:
    *    tags: [Transactions]
-  *    summary: Liste les transactions
-  *    description: Les administrateurs voient toutes les transactions, les utilisateurs voient uniquement les leurs.
+   *    summary: Liste les transactions
+   *    description: Les administrateurs voient toutes les transactions, les utilisateurs voient uniquement les leurs.
    *    security:
    *      - bearerAuth: []
    *    parameters:
