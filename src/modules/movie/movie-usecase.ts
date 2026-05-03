@@ -1,5 +1,6 @@
 import { Repository } from "typeorm";
 import { Movie } from "../../database/entities/movie.js";
+import { Screening } from "../../database/entities/screening.js";
 
 interface CreateMovieData {
   title: string;
@@ -38,7 +39,10 @@ export interface ListMovieFilter {
   releasedBefore?: Date;
 }
 export class MovieUsecase {
-  constructor(private movieRepository: Repository<Movie>) {}
+  constructor(
+    private movieRepository: Repository<Movie>,
+    private screeningRepository: Repository<Screening>
+  ) {}
 
   async createMovie(movieData: CreateMovieData) {
     const existing = await this.movieRepository.findOneBy({
@@ -126,5 +130,28 @@ export class MovieUsecase {
       totalCount,
       totalPages: Math.ceil(totalCount / size),
     };
+  }
+
+  async getScreeningsForMovie(
+    movieId: number,
+    from?: Date,
+    to?: Date
+  ): Promise<Screening[] | "MOVIE_NOT_FOUND"> {
+    const movie = await this.movieRepository.findOneBy({ id: movieId });
+    if (!movie) return "MOVIE_NOT_FOUND";
+
+    const query = this.screeningRepository
+      .createQueryBuilder("s")
+      .leftJoinAndSelect("s.movie", "movie")
+      .leftJoinAndSelect("s.room", "room")
+      .where("s.movie_id = :movieId", { movieId })
+      .andWhere("room.is_maintenance = false");
+
+    if (from) query.andWhere("s.start_time >= :from", { from });
+    if (to) query.andWhere("s.end_time <= :to", { to });
+
+    query.orderBy("s.start_time", "ASC");
+
+    return query.getMany();
   }
 }

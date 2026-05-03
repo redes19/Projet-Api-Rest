@@ -20,6 +20,7 @@ import {
   GetMovie,
   ListMovies,
   UpdateMovie,
+  GetMovieScreenings,
 } from "./modules/movie/movie-handler.js";
 import {
   CreateScreening,
@@ -845,6 +846,47 @@ export const initHandlers = (app: Application) => {
    *        description: Erreur interne du serveur.
    */
   app.get("/movies/:id", AuthMiddleware, GetMovie);
+
+  /**
+   * @openapi
+   * /movies/{id}/screenings:
+   *  get:
+   *    tags: [Movies]
+   *    summary: Liste les séances d'un film sur une période
+   *    description: Retourne toutes les séances d'un film (avec movie et room en relation), filtrables par période.
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: path
+   *        name: id
+   *        required: true
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *        description: Identifiant du film
+   *      - in: query
+   *        name: from
+   *        schema:
+   *          type: string
+   *          format: date-time
+   *        description: Filtre sur la date de début (ISO 8601)
+   *      - in: query
+   *        name: to
+   *        schema:
+   *          type: string
+   *          format: date-time
+   *        description: Filtre sur la date de fin (ISO 8601), doit être > from
+   *    responses:
+   *      200:
+   *        description: Liste des séances du film
+   *      400:
+   *        description: Erreur de validation des paramètres
+   *      404:
+   *        description: Film introuvable
+   *      500:
+   *        description: Erreur interne du serveur
+   */
+  app.get("/movies/:id/screenings", AuthMiddleware, GetMovieScreenings);
 
   /**
    * @openapi

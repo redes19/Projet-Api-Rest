@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../../database/database.js";
 import { Movie } from "../../database/entities/movie.js";
+import { Screening } from "../../database/entities/screening.js";
 import { generateValidationErrorMessage } from "../../utils/validators.js";
 import { MovieUsecase, type ListMovieFilter } from "./movie-usecase.js";
 import {
@@ -8,6 +9,7 @@ import {
   ListMovieValidator,
   MovieIdValidator,
   UpdateMovieValidator,
+  MovieScreeningsValidator,
 } from "./movie-validator.js";
 
 export const CreateMovie = async (req: Request, res: Response) => {
@@ -17,7 +19,10 @@ export const CreateMovie = async (req: Request, res: Response) => {
     return res.status(400).send(generateValidationErrorMessage(validation.error.details));
   }
 
-  const movieUseCase = new MovieUsecase(AppDataSource.getRepository(Movie));
+  const movieUseCase = new MovieUsecase(
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Screening)
+  );
 
   try {
     const movie = await movieUseCase.createMovie(validation.value);
@@ -44,7 +49,10 @@ export const GetMovie = async (req: Request, res: Response) => {
   }
 
   const movieIdRequest = validation.value;
-  const movieUsecase = new MovieUsecase(AppDataSource.getRepository(Movie));
+  const movieUsecase = new MovieUsecase(
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Screening)
+  );
   const movie = await movieUsecase.getMovie(movieIdRequest.id);
 
   if (movie === null) {
@@ -67,7 +75,10 @@ export const UpdateMovie = async (req: Request, res: Response) => {
   }
 
   const updateMovieRequest = validation.value;
-  const movieUsecase = new MovieUsecase(AppDataSource.getRepository(Movie));
+  const movieUsecase = new MovieUsecase(
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Screening)
+  );
   const existingMovie = await movieUsecase.getMovie(updateMovieRequest.id);
 
   if (!existingMovie) {
@@ -94,7 +105,10 @@ export const DeleteMovie = async (req: Request, res: Response) => {
   }
 
   const movieIdRequest = validation.value;
-  const movieUsecase = new MovieUsecase(AppDataSource.getRepository(Movie));
+  const movieUsecase = new MovieUsecase(
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Screening)
+  );
   const movie = await movieUsecase.getMovie(movieIdRequest.id);
 
   if (!movie) {
@@ -126,7 +140,10 @@ export const ListMovies = async (req: Request, res: Response) => {
     page = listMovieRequest.page;
   }
 
-  const movieUsecase = new MovieUsecase(AppDataSource.getRepository(Movie));
+  const movieUsecase = new MovieUsecase(
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Screening)
+  );
   const listMovieFilter: ListMovieFilter = {
     page,
     size,
@@ -146,4 +163,33 @@ export const ListMovies = async (req: Request, res: Response) => {
   const movies = await movieUsecase.listMovies(listMovieFilter);
 
   return res.send(movies.data);
+};
+
+export const GetMovieScreenings = async (req: Request, res: Response) => {
+  const movieId = parseInt(req.params.id as string, 10);
+  if (isNaN(movieId)) {
+    return res.status(400).send({ error: "Invalid movie id" });
+  }
+
+  const validation = MovieScreeningsValidator.validate(req.query);
+  if (validation.error) {
+    return res.status(400).send(generateValidationErrorMessage(validation.error.details));
+  }
+
+  const movieUsecase = new MovieUsecase(
+    AppDataSource.getRepository(Movie),
+    AppDataSource.getRepository(Screening)
+  );
+
+  const result = await movieUsecase.getScreeningsForMovie(
+    movieId,
+    validation.value.from,
+    validation.value.to
+  );
+
+  if (result === "MOVIE_NOT_FOUND") {
+    return res.status(404).send({ error: "Movie not found" });
+  }
+
+  return res.send(result);
 };
