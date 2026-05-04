@@ -2,7 +2,7 @@
 
 ## Architecture de l'API
 
-Architecture provisoire
+### Architecture provisoire
 
 ```
 src/
