@@ -221,7 +221,7 @@ function atTime(day: Date, hour: number, minute: number): Date {
   return d;
 }
 
-async function seedUsers() {
+export async function seedUsers() {
   const userRepo = AppDataSource.getRepository(User);
   const existing = await userRepo.count();
   if (existing > 0) {
@@ -245,7 +245,7 @@ async function seedUsers() {
   console.log(`[users] ${USERS_TO_SEED.length} créés (mot de passe: ${SEED_PASSWORD})`);
 }
 
-async function seedMovies(): Promise<Movie[]> {
+export async function seedMovies(): Promise<Movie[]> {
   const movieRepo = AppDataSource.getRepository(Movie);
   const existing = await movieRepo.find();
   if (existing.length > 0) {
@@ -268,7 +268,7 @@ async function seedMovies(): Promise<Movie[]> {
   return movies;
 }
 
-async function seedRooms(): Promise<Room[]> {
+export async function seedRooms(): Promise<Room[]> {
   const roomRepo = AppDataSource.getRepository(Room);
   const existing = await roomRepo.find();
   if (existing.length > 0) {
@@ -298,7 +298,7 @@ async function seedRooms(): Promise<Room[]> {
  * autant de salles qu'on a de films, en s'assurant qu'un film n'est pas
  * programmé en simultané dans 2 salles.
  */
-async function seedScreenings(movies: Movie[], rooms: Room[]) {
+export async function seedScreenings(movies: Movie[], rooms: Room[]) {
   const screeningRepo = AppDataSource.getRepository(Screening);
   const existing = await screeningRepo.count();
   if (existing > 0) {
@@ -389,4 +389,6 @@ export async function seedAllData() {
   }
 }
 
-seedAllData();
+if (process.argv[1] && process.argv[1].endsWith("seed.ts")) {
+  seedAllData();
+}
