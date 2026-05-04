@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { AppDataSource } from "./database/database.js";
 import { initHandlers } from "./routes.js";
 import { swaggerDocs } from "./swagger/swagger.js";
-import { seedAllData } from "./database/seed.js";
+import { seedAllData, seedMovies, seedRooms, seedScreenings, seedUsers } from "./database/seed.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +15,18 @@ initHandlers(app);
 
 swaggerDocs(app, PORT);
 
+if (CLEAR_DB) {
+  try {
+    await AppDataSource.initialize();
+    await AppDataSource.dropDatabase();
+    await AppDataSource.destroy();
+    console.log("Base de données effacée avec succès.");
+  } catch (error) {
+    console.error("Erreur lors de l'effacement de la base de données :", error);
+    process.exit(1);
+  }
+}
+
 try {
   await AppDataSource.initialize();
 } catch (error) {
@@ -23,19 +35,13 @@ try {
   process.exit(1);
 }
 
-if (CLEAR_DB) {
-  try {
-    await AppDataSource.dropDatabase();
-    console.log("Base de données effacée avec succès.");
-  } catch (error) {
-    console.error("Erreur lors de l'effacement de la base de données :", error);
-    process.exit(1);
-  }
-}
-
 if (SEED_DATA) {
   try {
-    await seedAllData();
+    await seedUsers();
+    const movies = await seedMovies();
+    const rooms = await seedRooms();
+    await seedScreenings(movies, rooms);
+    console.log("\n Seed terminé avec succès");
   } catch (error) {
     console.error("Erreur lors du seed de la base de données :", error);
     process.exit(1);
