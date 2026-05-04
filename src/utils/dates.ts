@@ -19,12 +19,31 @@ export function getDurationInMinutes(start: Date, end: Date): number {
   return Math.floor(milliseconds / (1000 * 60));
 }
 
-export function isWithinCinemaOpeningHours(start: Date): boolean {
+/**
+ * Vérifie que la séance se déroule entièrement dans le créneau d'ouverture du cinéma (9h-20h).
+ * - start doit être ≥ 09h00
+ * - end doit être ≤ 20h00
+ * - start et end doivent être le même jour
+ */
+export function isWithinCinemaOpeningHours(start: Date, end: Date): boolean {
   const startMinutes = toMinutesSinceMidnight(start);
+  const endMinutes = toMinutesSinceMidnight(end);
   const openMinutes = CINEMA_OPEN_HOUR * 60;
   const closeMinutes = CINEMA_CLOSE_HOUR * 60;
 
-  return startMinutes >= openMinutes && startMinutes <= closeMinutes;
+  if (!isSameCalendarDay(start, end)) return false;
+  if (startMinutes < openMinutes) return false;
+  if (endMinutes > closeMinutes) return false;
+  return true;
+}
+
+/**
+ * Le cinéma est ouvert du lundi au vendredi (cf. sujet : "ouvert du lundi au vendredi de 9h à 20h").
+ * getDay() : 0 = dimanche, 6 = samedi
+ */
+export function isCinemaOpenOnDay(date: Date): boolean {
+  const day = date.getDay();
+  return day !== 0 && day !== 6;
 }
 
 export function hasMinimumScreeningDuration(

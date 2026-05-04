@@ -30,3 +30,8 @@ export interface ListMovieRequest {
   releasedAfter?: Date | undefined;
   releasedBefore?: Date | undefined;
 }
+
+export interface MovieScreeningsRequest {
+  from?: Date | undefined;
+  to?: Date | undefined;
+}

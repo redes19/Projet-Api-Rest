@@ -4,6 +4,7 @@ import {
   ListMovieRequest,
   MovieIdRequest,
   UpdateMovieRequest,
+  MovieScreeningsRequest,
 } from "./movie-request.js";
 
 export const MovieIdValidator = Joi.object<MovieIdRequest>({
@@ -55,3 +56,8 @@ export const ListMovieValidator = Joi.object<ListMovieRequest>({
     "any.required": "is required",
   })
   .options({ abortEarly: false });
+
+export const MovieScreeningsValidator = Joi.object<MovieScreeningsRequest>({
+  from: Joi.date().iso().optional(),
+  to: Joi.date().iso().greater(Joi.ref("from")).optional(),
+}).options({ abortEarly: false });
