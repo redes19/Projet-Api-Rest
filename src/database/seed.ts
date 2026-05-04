@@ -371,7 +371,7 @@ async function seedScreenings(movies: Movie[], rooms: Room[]) {
   console.log(`[screenings] ${totalCreated} créées sur 30 jours`);
 }
 
-async function main() {
+export async function seedAllData() {
   console.log("Initialisation de la BDD...");
   await AppDataSource.initialize();
 
@@ -389,4 +389,4 @@ async function main() {
   }
 }
 
-main();
+seedAllData();
