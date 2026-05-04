@@ -31,21 +31,21 @@ const USERS_TO_SEED: Array<{
   balance: number;
 }> = [
   {
-    email: "admin@cinema.local",
+    email: "admin@cinema.com",
     role: UserRole.ADMIN,
     first_name: "Alice",
     last_name: "Admin",
     balance: 0,
   },
   {
-    email: "employee@cinema.local",
+    email: "employee@cinema.com",
     role: UserRole.EMPLOYEE,
     first_name: "Eve",
     last_name: "Employee",
     balance: 0,
   },
   {
-    email: "client@cinema.local",
+    email: "client@cinema.com",
     role: UserRole.CLIENT,
     first_name: "Charlie",
     last_name: "Client",
@@ -118,18 +118,90 @@ const ROOMS_TO_SEED: Array<{
   capacity: number;
   has_disabled_access: boolean;
 }> = [
-  { name: "Salle 1 - Lumière",     description: "Salle classique 2D",        type: RoomType.TWO_D,   capacity: 25, has_disabled_access: true  },
-  { name: "Salle 2 - Méliès",      description: "Salle premium IMAX",         type: RoomType.IMAX,    capacity: 30, has_disabled_access: true  },
-  { name: "Salle 3 - Gondry",      description: "Salle VIP premium",          type: RoomType.VIP,     capacity: 15, has_disabled_access: false },
-  { name: "Salle 4 - Truffaut",    description: "Salle 3D",                   type: RoomType.THREE_D, capacity: 22, has_disabled_access: true  },
-  { name: "Salle 5 - Renoir",      description: "Salle 4DX immersive",        type: RoomType.FOUR_DX, capacity: 20, has_disabled_access: false },
-  { name: "Salle 6 - Godard",      description: "Salle 2D",                   type: RoomType.TWO_D,   capacity: 28, has_disabled_access: true  },
-  { name: "Salle 7 - Varda",       description: "Salle 3D",                   type: RoomType.THREE_D, capacity: 18, has_disabled_access: true  },
-  { name: "Salle 8 - Resnais",     description: "Salle IMAX",                 type: RoomType.IMAX,    capacity: 30, has_disabled_access: true  },
-  { name: "Salle 9 - Demy",        description: "Salle 2D enfants",           type: RoomType.TWO_D,   capacity: 16, has_disabled_access: true  },
-  { name: "Salle 10 - Kassovitz",  description: "Salle 4DX",                  type: RoomType.FOUR_DX, capacity: 24, has_disabled_access: false },
-  { name: "Salle 11 - Audiard",    description: "Salle VIP",                  type: RoomType.VIP,     capacity: 15, has_disabled_access: true  },
-  { name: "Salle 12 - Besson",     description: "Salle 2D",                   type: RoomType.TWO_D,   capacity: 26, has_disabled_access: true  },
+  {
+    name: "Salle 1 - Lumière",
+    description: "Salle classique 2D",
+    type: RoomType.TWO_D,
+    capacity: 25,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 2 - Méliès",
+    description: "Salle premium IMAX",
+    type: RoomType.IMAX,
+    capacity: 30,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 3 - Gondry",
+    description: "Salle VIP premium",
+    type: RoomType.VIP,
+    capacity: 15,
+    has_disabled_access: false,
+  },
+  {
+    name: "Salle 4 - Truffaut",
+    description: "Salle 3D",
+    type: RoomType.THREE_D,
+    capacity: 22,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 5 - Renoir",
+    description: "Salle 4DX immersive",
+    type: RoomType.FOUR_DX,
+    capacity: 20,
+    has_disabled_access: false,
+  },
+  {
+    name: "Salle 6 - Godard",
+    description: "Salle 2D",
+    type: RoomType.TWO_D,
+    capacity: 28,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 7 - Varda",
+    description: "Salle 3D",
+    type: RoomType.THREE_D,
+    capacity: 18,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 8 - Resnais",
+    description: "Salle IMAX",
+    type: RoomType.IMAX,
+    capacity: 30,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 9 - Demy",
+    description: "Salle 2D enfants",
+    type: RoomType.TWO_D,
+    capacity: 16,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 10 - Kassovitz",
+    description: "Salle 4DX",
+    type: RoomType.FOUR_DX,
+    capacity: 24,
+    has_disabled_access: false,
+  },
+  {
+    name: "Salle 11 - Audiard",
+    description: "Salle VIP",
+    type: RoomType.VIP,
+    capacity: 15,
+    has_disabled_access: true,
+  },
+  {
+    name: "Salle 12 - Besson",
+    description: "Salle 2D",
+    type: RoomType.TWO_D,
+    capacity: 26,
+    has_disabled_access: true,
+  },
 ];
 
 /** Renvoie le prochain lundi à minuit (>= aujourd'hui). */
