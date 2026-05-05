@@ -139,8 +139,7 @@ src/
 
 ### Statistiques et Administration Avancée
 
-- [ ] Suivi en temps réel du taux de fréquentation et affluence hebdomadaire.
-- [ ] Visualisation par l'administrateur du nombre de billets vendus par séance.
+- [X] Visualisation par l'administrateur du nombre de billets vendus par séance.
 - [ ] Tracking détaillé de l'activité des utilisateurs (films vus).
 
 ### Technique et Infrastructure
