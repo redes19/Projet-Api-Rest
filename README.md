@@ -1,112 +1,89 @@
 # Projet API
 
-## Architecture de l'API
+- [Lien vers le projet sur GitHub](https://github.com/redes19/Projet-Api-Rest)
+- [Lien vers l'application publique](https://api-cinema-6qx5.onrender.com)
+- [Documentation Swagger](https://api-cinema-6qx5.onrender.com/docs)
 
-### Architecture provisoire
+## Acces public
+
+- Application : https://api-cinema-6qx5.onrender.com
+- Swagger : https://api-cinema-6qx5.onrender.com/docs
+
+## Lancer en local
+
+### 1. Prerequis
+
+- Node.js 24+
+- Docker + Docker Compose
+
+### 2. Demarrer la base Postgres (dev)
+
+```powershell
+docker compose -f docker-compose.dev.yml up -d
+```
+
+### 3 Variables d'environnement
+
+Creer un fichier .env a la racine du projet :
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=cinema
+DB_PASSWORD=cinema
+DB_NAME=cinema_db
+PORT=3000
+SEED_DATA=false
+CLEAR_DB=false
+```
+
+### 4 Installer les dependances et lancer l'API
+
+```powershell
+npm install
+npm run seed
+npm run dev
+```
+
+L'API tourne sur <http://localhost:3000>
+
+## Lancer en production (Docker)
+
+```powershell
+docker build -t cinema-api:latest .
+docker run -d -p 3000:3000 --name cinema-api --env-file .env cinema-api:latest
+```
+
+## Exporter la BDD
+
+```powershell
+docker compose -f docker-compose.dev.yml exec -T postgres pg_dump -U cinema -d cinema_db > cinema_db_dump.sql
+```
+
+## Architecture de l'API
 
 ```
 src/
-│
-├── index.ts
-├── routes.ts
-│
-├── config/
-│   ├── env.ts
-│   ├── jwt.ts
-│   └── swagger.ts
-│
-├── common/
-│   ├── errors/
-│   │   ├── app-error.ts
-│   │   ├── domain-error.ts
-│   │   └── http-error.ts
-│   ├── types/
-│   │   ├── auth-request.ts
-│   │   └── pagination.ts
-│   └── utils/
-│       ├── date-range.ts
-│       ├── money.ts
-│       └── password.ts
-│
-├── middleware/
+├── database/           # Configuration et entités TypeORM
+│   ├── entities/       # Définitions des modèles de données (Movie, User, etc.)
+│   ├── database.ts     # Configuration de la connexion
+│   └── seed.ts         # Script de peuplement de la base
+├── middleware/         # Middlewares Express
 │   ├── auth.middleware.ts
-│   ├── role.middleware.ts
-│   ├── validation.middleware.ts
 │   ├── error.middleware.ts
-│   └── request-logger.middleware.ts
-│
-├── modules/
-│   ├── auth/
-│   │   ├── auth.controller.ts
-│   │   ├── auth.usecase.ts
-│   │   ├── auth.repository.ts
-│   │   ├── auth.validator.ts
-│   │   └── auth.swagger.ts
-│   ├── users/
-│   │   ├── users.controller.ts
-│   │   ├── users.usecase.ts
-│   │   ├── users.repository.ts
-│   │   ├── users.validator.ts
-│   │   └── users.swagger.ts
-│   ├── rooms/
-│   │   ├── rooms.controller.ts
-│   │   ├── rooms.usecase.ts
-│   │   ├── rooms.repository.ts
-│   │   ├── rooms.validator.ts
-│   │   └── rooms.swagger.ts
-│   ├── movies/
-│   │   ├── movies.controller.ts
-│   │   ├── movies.usecase.ts
-│   │   ├── movies.repository.ts
-│   │   ├── movies.validator.ts
-│   │   └── movies.swagger.ts
-│   ├── screenings/
-│   │   ├── screenings.controller.ts
-│   │   ├── screenings.usecase.ts
-│   │   ├── screenings.repository.ts
-│   │   ├── screenings.validator.ts
-│   │   └── screenings.swagger.ts
-│   ├── tickets/
-│   │   ├── tickets.controller.ts
-│   │   ├── tickets.usecase.ts
-│   │   ├── tickets.repository.ts
-│   │   ├── tickets.validator.ts
-│   │   └── tickets.swagger.ts
-│   ├── wallet/
-│   │   ├── wallet.controller.ts
-│   │   ├── wallet.usecase.ts
-│   │   ├── wallet.repository.ts
-│   │   ├── wallet.validator.ts
-│   │   └── wallet.swagger.ts
-│   └── stats/
-│       ├── stats.controller.ts
-│       ├── stats.usecase.ts
-│       ├── stats.repository.ts
-│       ├── stats.validator.ts
-│       └── stats.swagger.ts
-│
-├── database/
-│   ├── database.ts
-│   └── entities/
-│       ├── movie.ts
-│       ├── room.ts
-│       ├── screening.ts
-│       ├── test.ts
-│       ├── ticket.ts
-│       ├── token.ts
-│       ├── transaction.ts
-│       └── user.ts
-│
-└── docs/
-    └── openapi/
-        ├── index.ts
-        └── schemas/
-            ├── user.schema.ts
-            ├── room.schema.ts
-            ├── movie.schema.ts
-            ├── screening.schema.ts
-            ├── ticket.schema.ts
-            └── transaction.schema.ts
+│   └── validation.middleware.ts
+├── modules/            # Modules métier découpés par domaine
+│   ├── auth/           # Authentification
+│   ├── balance/        # Portefeuille
+│   ├── movie/          # Films
+│   ├── room/           # Salles
+│   ├── screening/      # Séances
+│   ├── ticket/         # Billets
+│   ├── transaction/    # Transactions
+|   └── user/           # Utilisateurs
+├── swagger/            # Configuration OpenAPI / Swagger
+├── types/              # Définitions de types TypeScript personnalisées
+└── utils/              # Fonctions utilitaires (dates, erreurs, validateurs)
 ```
 
 ## Fonctionnalités Réalisées
@@ -139,7 +116,7 @@ src/
 
 ### Statistiques et Administration Avancée
 
-- [X] Visualisation par l'administrateur du nombre de billets vendus par séance.
+- [x] Visualisation par l'administrateur du nombre de billets vendus par séance.
 - [ ] Tracking détaillé de l'activité des utilisateurs (films vus).
 
 ### Technique et Infrastructure
