@@ -46,6 +46,10 @@ import { RequireRole } from "./middleware/role.middleware.js";
 import { UserRole } from "./database/entities/user.js";
 import { DepositBalance, GetBalance, WithdrawBalance } from "./modules/balance/balance-handler.js";
 import { ListTransactions } from "./modules/transaction/transaction-handler.js";
+import {
+  GetDailyAttendance,
+  GetPeriodAttendance,
+} from "./modules/stats/stats-handler.js";
 
 export const initHandlers = (app: Application) => {
   app.get("/", (req: Request, res: Response) => {
@@ -1741,4 +1745,98 @@ export const initHandlers = (app: Application) => {
    *        description: Erreur interne du serveur.
    */
   app.get("/transactions", AuthMiddleware, ListTransactions);
+
+  // ========================================
+  //                 STATS
+  // ========================================
+
+  /**
+   * @openapi
+   * /stats/attendance/daily:
+   *  get:
+   *    tags: [Stats]
+   *    summary: Affluence quotidienne (ADMIN)
+   *    description: Retourne le nombre de spectateurs sur une journée, par séance et au total. Optionnellement filtré par salle.
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: query
+   *        name: date
+   *        schema:
+   *          type: string
+   *          format: date
+   *        description: Date cible au format ISO (par défaut aujourd'hui)
+   *      - in: query
+   *        name: roomId
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *        description: ID de la salle (optionnel, sinon global cinéma)
+   *    responses:
+   *      200:
+   *        description: Affluence quotidienne
+   *      400:
+   *        description: Requête invalide.
+   *      401:
+   *        description: Non autorisé.
+   *      403:
+   *        description: Accès interdit.
+   *      500:
+   *        description: Erreur interne du serveur.
+   */
+  app.get(
+    "/stats/attendance/daily",
+    AuthMiddleware,
+    RequireRole(UserRole.ADMIN),
+    GetDailyAttendance
+  );
+
+  /**
+   * @openapi
+   * /stats/attendance:
+   *  get:
+   *    tags: [Stats]
+   *    summary: Affluence sur une période (ADMIN)
+   *    description: Retourne les statistiques d'affluence sur une période donnée (totaux, moyennes, top films).
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *      - in: query
+   *        name: from
+   *        required: true
+   *        schema:
+   *          type: string
+   *          format: date
+   *        description: Date de début (ISO 8601)
+   *      - in: query
+   *        name: to
+   *        required: true
+   *        schema:
+   *          type: string
+   *          format: date
+   *        description: Date de fin (ISO 8601), doit être > from
+   *      - in: query
+   *        name: roomId
+   *        schema:
+   *          type: integer
+   *          minimum: 1
+   *        description: ID de la salle (optionnel, sinon global cinéma)
+   *    responses:
+   *      200:
+   *        description: Statistiques d'affluence sur la période
+   *      400:
+   *        description: Requête invalide.
+   *      401:
+   *        description: Non autorisé.
+   *      403:
+   *        description: Accès interdit.
+   *      500:
+   *        description: Erreur interne du serveur.
+   */
+  app.get(
+    "/stats/attendance",
+    AuthMiddleware,
+    RequireRole(UserRole.ADMIN),
+    GetPeriodAttendance
+  );
 };
